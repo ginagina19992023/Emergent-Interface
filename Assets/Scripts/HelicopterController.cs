@@ -129,6 +129,7 @@ public class HelicopterController : MonoBehaviour
         if (Physics.Raycast(origin, direction, out RaycastHit hit, maxRange, hitLayers))
         {
             FloatingTarget target = hit.collider.GetComponentInParent<FloatingTarget>();
+
             if (target != null)
                 target.TakeHit(damage);
         }
