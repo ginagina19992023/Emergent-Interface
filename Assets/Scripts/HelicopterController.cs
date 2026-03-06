@@ -48,6 +48,26 @@ public class HelicopterController : MonoBehaviour
     [Tooltip("Layers the hitscan ray can hit.")]
     [SerializeField] private LayerMask hitLayers = ~0;
 
+    [Header("Shoot Effects")]
+    [Tooltip("AudioSource used for shooting sounds (should be on the helicopter).")]
+    [SerializeField] private AudioSource shootAudioSource;
+
+    [Tooltip("Sound played when the weapon fires.")]
+    [SerializeField] private AudioClip shootSound;
+
+    [Tooltip("Sound played when a target is hit (but not destroyed).")]
+    [SerializeField] private AudioClip hitMarkerSound;
+
+    [Tooltip("Prefab with a LineRenderer for the bullet trail. Spawned per shot.")]
+    [SerializeField] private LineRenderer bulletTrailPrefab;
+
+    [Tooltip("How long the bullet trail is visible (seconds).")]
+    [SerializeField] private float trailDuration = 0.08f;
+
+    [Header("Gravity")]
+    [Tooltip("Extra downward acceleration when not thrusting, on top of normal gravity.")]
+    [SerializeField] private float fallAcceleration = 15f;
+
     private Rigidbody rb;
     private HelicopterInput input;
 
@@ -77,12 +97,15 @@ public class HelicopterController : MonoBehaviour
 
     private void ApplyThrust()
     {
-        // Thrust along local up. No hover force — the helicopter falls without active throttle.
         float throttle01 = Mathf.Clamp01(input.Throttle);
         float thrust = idleThrust + throttle01 * maxThrust;
 
         Vector3 thrustVector = transform.up * thrust;
         rb.AddForce(thrustVector, ForceMode.Acceleration);
+
+        // Pull the helicopter down harder when not actively thrusting
+        if (throttle01 < 0.01f)
+            rb.AddForce(Vector3.down * fallAcceleration, ForceMode.Acceleration);
     }
 
     private void ApplyYaw()
@@ -126,12 +149,39 @@ public class HelicopterController : MonoBehaviour
         Vector3 origin = firePoint != null ? firePoint.position : transform.position + transform.forward * 2f;
         Vector3 direction = firePoint != null ? firePoint.forward : transform.forward;
 
-        if (Physics.Raycast(origin, direction, out RaycastHit hit, maxRange, hitLayers))
-        {
-            FloatingTarget target = hit.collider.GetComponentInParent<FloatingTarget>();
+        // Shoot SFX
+        if (shootSound != null && shootAudioSource != null)
+            shootAudioSource.PlayOneShot(shootSound);
 
+        Vector3 endPoint = origin + direction * maxRange;
+        bool didHit = Physics.Raycast(origin, direction, out RaycastHit hit, maxRange, hitLayers);
+
+        if (didHit)
+        {
+            endPoint = hit.point;
+
+            FloatingTarget target = hit.collider.GetComponentInParent<FloatingTarget>();
             if (target != null)
+            {
                 target.TakeHit(damage);
+
+                // Hit marker SFX
+                if (hitMarkerSound != null && shootAudioSource != null)
+                    shootAudioSource.PlayOneShot(hitMarkerSound);
+            }
         }
+
+        // Bullet trail
+        if (bulletTrailPrefab != null)
+            SpawnTrail(origin, endPoint);
+    }
+
+    private void SpawnTrail(Vector3 start, Vector3 end)
+    {
+        LineRenderer trail = Instantiate(bulletTrailPrefab);
+        trail.positionCount = 2;
+        trail.SetPosition(0, start);
+        trail.SetPosition(1, end);
+        Destroy(trail.gameObject, trailDuration);
     }
 }

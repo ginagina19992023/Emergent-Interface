@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -24,6 +25,20 @@ public class FloatingTarget : MonoBehaviour
   [Tooltip("How many hit points the target has.")]
   [SerializeField] private float health = 3f;
 
+  [Header("Audio")]
+  [Tooltip("Sound played when the target is hit but not destroyed.")]
+  [SerializeField] private AudioClip hitSound;
+
+  [Tooltip("Sound played when the target is destroyed.")]
+  [SerializeField] private AudioClip destroySound;
+
+  [Header("VFX")]
+  [Tooltip("Particle system prefab spawned on destruction (explosion).")]
+  [SerializeField] private GameObject explosionPrefab;
+
+  /// <summary>Invoked just before the target is destroyed.</summary>
+  public event Action OnDestroyed;
+
   private Vector3 startPosition;
   private Vector3 driftDirection;
   private float driftTimer;
@@ -32,7 +47,7 @@ public class FloatingTarget : MonoBehaviour
   void Start()
   {
     startPosition = transform.position;
-    timeOffset = Random.Range(0f, Mathf.PI * 2f);
+    timeOffset = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
     PickNewDriftDirection();
   }
 
@@ -53,7 +68,7 @@ public class FloatingTarget : MonoBehaviour
 
   private void PickNewDriftDirection()
   {
-    float angle = Random.Range(0f, 360f);
+    float angle = UnityEngine.Random.Range(0f, 360f);
     driftDirection = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)).normalized;
     driftTimer = driftChangeInterval;
   }
@@ -61,7 +76,28 @@ public class FloatingTarget : MonoBehaviour
   public void TakeHit(float damageAmount)
   {
     health -= damageAmount;
+
     if (health <= 0f)
+    {
+      // Explosion VFX
+      if (explosionPrefab != null)
+      {
+        GameObject fx = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+        Destroy(fx, 3f);
+      }
+
+      // Destroy sound (played at position so it outlives this object)
+      if (destroySound != null)
+        AudioSource.PlayClipAtPoint(destroySound, transform.position);
+
+      OnDestroyed?.Invoke();
       Destroy(gameObject);
+    }
+    else
+    {
+      // Hit sound
+      if (hitSound != null)
+        AudioSource.PlayClipAtPoint(hitSound, transform.position);
+    }
   }
 }
