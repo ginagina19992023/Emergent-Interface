@@ -12,8 +12,8 @@ public class HelicopterController : MonoBehaviour
     [Tooltip("Maximum upward force applied along the helicopter's local up axis.")]
     [SerializeField] private float maxThrust = 30f;
 
-    [Tooltip("Force needed to counteract gravity when throttle is neutral (auto-hover).")]
-    [SerializeField] private float hoverForce = 9.81f;
+    [Tooltip("Minimum upward force when throttle is at zero (set to 0 to fall without input).")]
+    [SerializeField] private float idleThrust = 0f;
 
     [Header("Rotation")]
     [Tooltip("Degrees per second of yaw rotation.")]
@@ -35,15 +35,18 @@ public class HelicopterController : MonoBehaviour
     [Tooltip("Angular drag applied by the Rigidbody (set on Start).")]
     [SerializeField] private float angularDrag = 4f;
 
-    [Header("Shooting")]
-    [Tooltip("Bullet prefab to instantiate. Must have a Rigidbody and Bullet component.")]
-    [SerializeField] private GameObject bulletPrefab;
+    [Header("Shooting (Hitscan)")]
+    [Tooltip("Maximum range of the hitscan weapon.")]
+    [SerializeField] private float maxRange = 500f;
 
-    [Tooltip("Transform used as the bullet spawn point. If empty, uses the helicopter's position.")]
+    [Tooltip("Damage dealt per shot.")]
+    [SerializeField] private float damage = 1f;
+
+    [Tooltip("Transform used as the ray origin. If empty, uses the helicopter's position.")]
     [SerializeField] private Transform firePoint;
 
-    [Tooltip("Speed at which bullets are launched.")]
-    [SerializeField] private float bulletSpeed = 80f;
+    [Tooltip("Layers the hitscan ray can hit.")]
+    [SerializeField] private LayerMask hitLayers = ~0;
 
     private Rigidbody rb;
     private HelicopterInput input;
@@ -74,10 +77,9 @@ public class HelicopterController : MonoBehaviour
 
     private void ApplyThrust()
     {
-        // Thrust always points along the helicopter's local up axis,
-        // so tilting the helicopter redirects the thrust vector.
-        float thrust = hoverForce + input.Throttle * maxThrust;
-        thrust = Mathf.Max(thrust, 0f);
+        // Thrust along local up. No hover force — the helicopter falls without active throttle.
+        float throttle01 = Mathf.Clamp01(input.Throttle);
+        float thrust = idleThrust + throttle01 * maxThrust;
 
         Vector3 thrustVector = transform.up * thrust;
         rb.AddForce(thrustVector, ForceMode.Acceleration);
@@ -121,17 +123,14 @@ public class HelicopterController : MonoBehaviour
 
     private void Shoot()
     {
-        if (bulletPrefab == null) return;
+        Vector3 origin = firePoint != null ? firePoint.position : transform.position + transform.forward * 2f;
+        Vector3 direction = firePoint != null ? firePoint.forward : transform.forward;
 
-        Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + transform.forward * 2f;
-        Quaternion spawnRot = firePoint != null ? firePoint.rotation : transform.rotation;
-
-        GameObject bullet = Instantiate(bulletPrefab, spawnPos, spawnRot);
-        Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
-        if (bulletRb != null)
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, maxRange, hitLayers))
         {
-            bulletRb.linearVelocity = rb.linearVelocity;
-            bulletRb.AddForce(spawnRot * Vector3.forward * bulletSpeed, ForceMode.VelocityChange);
+            FloatingTarget target = hit.collider.GetComponentInParent<FloatingTarget>();
+            if (target != null)
+                target.TakeHit(damage);
         }
     }
 }
