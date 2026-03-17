@@ -1,9 +1,11 @@
+#define UPDATE_RATE 10 // 100Hz
+
 // --------------------
 // Pin Definitions
 // --------------------
-#define ENCODER_A 2
-#define ENCODER_B 3
-#define BIKE_PIN 4
+#define ENCODER_A 3
+#define ENCODER_B 4
+#define BIKE_PIN 2
 #define MIC_PIN A0
 
 // SET TO 1 FOR UNITY CONNECTION. SET TO 0 FOR CONSOLE OUTPUT TESTING
@@ -17,7 +19,7 @@ volatile long encoderPosition = 0;
 // --------------------
 // Bike Sensor Variables
 // --------------------
-const int debounce = 200;     
+const int debounce = 100 / UPDATE_RATE;
 int timeSinceLastRevolution = 999999;
 int bikeRevolution = 0;
 int prevState = 0;
@@ -29,8 +31,8 @@ int prevState = 0;
 // --------------------
 // Mic Hit Detection
 // --------------------
-const int micThreshold = 500;      // Adjust experimentally
-const unsigned long hitCooldown = 100; // ms between hits
+const int micThreshold = 200;      // Adjust experimentally
+const unsigned long hitCooldown = 100; // cycles between hits
 unsigned long lastHitTime = 0;
 int hitDetected = 0;
 
@@ -90,7 +92,7 @@ void loop() {
   }
 
   // ---- Bike Sensor ----
-  int currentState = analogRead(BIKE_PIN);
+  int currentState = digitalRead(BIKE_PIN);
 
   if(currentState == 0 && prevState != 0){
     if(timeSinceLastRevolution > debounce){
@@ -103,6 +105,7 @@ void loop() {
     }
   }
   timeSinceLastRevolution++;
+  prevState = currentState;
 
   // ---- Send Data ----
   #if DEBUG
@@ -125,5 +128,5 @@ void loop() {
   hitDetected = 0;
   bikeRevolution = 0;
 
-  delay(10);  // ~100Hz update rate
+  delay(UPDATE_RATE);  // ~100Hz update rate
 }
