@@ -8,12 +8,9 @@ using UnityEngine;
 [RequireComponent(typeof(HelicopterInput))]
 public class HelicopterController : MonoBehaviour
 {
-    [Header("Thrust")]
-    [Tooltip("Maximum upward force applied along the helicopter's local up axis.")]
-    [SerializeField] private float maxThrust = 30f;
-
-    [Tooltip("Minimum upward force when throttle is at zero (set to 0 to fall without input).")]
-    [SerializeField] private float idleThrust = 0f;
+    [Header("Jump (tap to rise)")]
+    [Tooltip("Upward velocity added per jump click. Tuned so ~1 press per second keeps the helicopter hovering (with default gravity + fall).")]
+    [SerializeField] private float jumpVelocity = 25f;
 
     [Header("Rotation")]
     [Tooltip("Degrees per second of yaw rotation.")]
@@ -65,7 +62,7 @@ public class HelicopterController : MonoBehaviour
     [SerializeField] private float trailDuration = 0.08f;
 
     [Header("Gravity")]
-    [Tooltip("Extra downward acceleration when not thrusting, on top of normal gravity.")]
+    [Tooltip("Extra downward acceleration on top of normal gravity (helicopter falls when not tapping jump).")]
     [SerializeField] private float fallAcceleration = 15f;
 
     private Rigidbody rb;
@@ -83,7 +80,10 @@ public class HelicopterController : MonoBehaviour
 
     void FixedUpdate()
     {
-        ApplyThrust();
+        if (input.ConsumeJumpPressed())
+            rb.AddForce(transform.up * jumpVelocity, ForceMode.VelocityChange);
+
+        ApplyFall();
         ApplyYaw();
         ApplyPitch();
         StabilizeRoll();
@@ -95,17 +95,9 @@ public class HelicopterController : MonoBehaviour
             Shoot();
     }
 
-    private void ApplyThrust()
+    private void ApplyFall()
     {
-        float throttle01 = Mathf.Clamp01(input.Throttle);
-        float thrust = idleThrust + throttle01 * maxThrust;
-
-        Vector3 thrustVector = transform.up * thrust;
-        rb.AddForce(thrustVector, ForceMode.Acceleration);
-
-        // Pull the helicopter down harder when not actively thrusting
-        if (throttle01 < 0.01f)
-            rb.AddForce(Vector3.down * fallAcceleration, ForceMode.Acceleration);
+        rb.AddForce(Vector3.down * fallAcceleration, ForceMode.Acceleration);
     }
 
     private void ApplyYaw()

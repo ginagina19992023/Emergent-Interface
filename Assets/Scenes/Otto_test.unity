@@ -321,9 +321,9 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 126
   m_CollisionDetection: 0
 --- !u!65 &133578980
 BoxCollider:
@@ -1007,8 +1007,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19e74e7bfdfd5cc4dbcd8d9ff5b56397, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HelicopterController
-  maxThrust: 20
-  idleThrust: 0
+  jumpVelocity: 15
   yawSpeed: 40
   pitchSpeed: 30
   maxPitchAngle: 45
@@ -1026,7 +1025,7 @@ MonoBehaviour:
   hitMarkerSound: {fileID: 8300000, guid: e5f55284d5888e54a9defc4b599f9e04, type: 3}
   bulletTrailPrefab: {fileID: 1624054862}
   trailDuration: 0.08
-  fallAcceleration: 15
+  fallAcceleration: 10
 --- !u!114 &1174193909
 MonoBehaviour:
   m_ObjectHideFlags: 0
