@@ -1,51 +1,100 @@
 import board
 import digitalio
+import analogio
+import rotaryio
 import time
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keycode import Keycode
 
-# Set up the keyboard as a USB HID device
+# --------------------
+# Pico W2 Pin Definitions (GPIO numbers)
+# --------------------
+# Rotary encoder: A and B channels
+ENCODER_A_PIN = board.GP2  # Encoder channel A
+ENCODER_B_PIN = board.GP3  # Encoder channel B
+BIKE_PIN = board.GP4  # Bike revolution sensor (digital, pullup)
+MIC_PIN = board.GP26  # Contact mic (analog, ADC0 on Pico W2)
+
+# --------------------
+# Timing (matches arduinocontroller.ino: 100Hz update rate)
+# --------------------
+UPDATE_RATE = 0.010  # 10 ms → ~100 Hz
+
+# --------------------
+# Bike sensor (matches .ino: falling edge + debounce)
+# --------------------
+DEBOUNCE_CYCLES = 10  # 100/UPDATE_RATE equivalent
+time_since_last_revolution = 999999
+prev_bike_state = True  # pullup → high when no magnet
+
+# --------------------
+# Mic hit detection (matches .ino)
+# --------------------
+MIC_THRESHOLD = 200
+HIT_COOLDOWN = 0.100  # 100 ms in seconds
+last_hit_time = 0.0
+
+# --------------------
+# Encoder: last position for A/D key mapping
+# --------------------
+last_encoder_position = 0
+
+# --------------------
+# Setup
+# --------------------
 kbd = Keyboard(usb_hid.devices)
 
-# 1. Set up the sensor pin.
-# Note: Change 'board.GP2' to match your specific board's pinout
-sensor = digitalio.DigitalInOut(board.GP2)  # physical pin 4
-sensor.direction = digitalio.Direction.INPUT
-sensor.pull = digitalio.Pull.UP
+# Rotary encoder (quadrature)
+encoder = rotaryio.IncrementalEncoder(ENCODER_A_PIN, ENCODER_B_PIN)
 
-# 2. Variables
-debounce_time = 0.200  # 200 milliseconds in seconds
-last_revolution_time = -999999  # Ensures the first read triggers immediately
-revolution_count = 0
+# Bike sensor
+bike_sensor = digitalio.DigitalInOut(BIKE_PIN)
+bike_sensor.direction = digitalio.Direction.INPUT
+bike_sensor.pull = digitalio.Pull.UP
 
-# INPUT_PULLUP means the pin naturally sits at True (High).
-# When the magnet passes the sensor, it pulls it to False (Low).
-prev_state = True
+# Contact mic (analog)
+mic = analogio.AnalogIn(MIC_PIN)
 
-print("Bike Tracker Ready! Waiting for revolutions to send keystrokes...")
+print("Ready. Encoder→A/D, Bike rev→W, Mic hit→SPACE")
 
 while True:
-    current_state = sensor.value
+    loop_start = time.monotonic()
 
-    # Look for a "falling edge" - the moment it goes from True to False
-    if current_state is False and prev_state is True:
-        current_time = time.monotonic()
+    # ---- Rotary encoder → A and D keys ----
+    pos = encoder.position
+    if pos > last_encoder_position:
+        # Turned one way → press D
+        kbd.send(Keycode.D)
+    elif pos < last_encoder_position:
+        # Turned other way → press A
+        kbd.send(Keycode.A)
+    last_encoder_position = pos
 
-        # Check if enough actual time has passed (debounce)
-        if (current_time - last_revolution_time) > debounce_time:
-            last_revolution_time = current_time
-            revolution_count += 1
-
-            # --- HID BUTTON PRESS ---
-            # kbd.send() presses and releases the key instantly.
-            # Change Keycode.SPACE to Keycode.A, Keycode.UP_ARROW, etc., as needed.
+    # ---- Contact mic hit → SPACE ----
+    mic_value = mic.value  # 0–65535 on CircuitPython (16-bit)
+    # Scale to match Arduino 0–1023 range for same threshold
+    mic_scaled = (mic_value * 1023) // 65535
+    if mic_scaled > MIC_THRESHOLD:
+        now = time.monotonic()
+        if (now - last_hit_time) > HIT_COOLDOWN:
+            last_hit_time = now
+            print("Punch detected", "pressed SPACE")
             kbd.send(Keycode.SPACE)
 
-            print("Revolutions:", revolution_count, "| Keystroke Sent!")
+    # ---- Bike revolution → W ----
+    current_bike_state = bike_sensor.value
+    # Falling edge: was high, now low (magnet passed)
+    if current_bike_state is False and prev_bike_state is True:
+        if time_since_last_revolution > DEBOUNCE_CYCLES:
+            time_since_last_revolution = 0
+            print("Rotation detected", "pressed W")
+            kbd.send(Keycode.W)
+    time_since_last_revolution += 1
+    prev_bike_state = current_bike_state
 
-    # Update state for the next loop
-    prev_state = current_state
-
-    # A tiny delay keeps the loop from maxing out the microcontroller's CPU
-    time.sleep(0.001)
+    # Maintain ~100 Hz update rate
+    elapsed = time.monotonic() - loop_start
+    sleep_time = UPDATE_RATE - elapsed
+    if sleep_time > 0:
+        time.sleep(sleep_time)
