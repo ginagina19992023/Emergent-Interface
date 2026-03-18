@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -36,6 +37,23 @@ public class FloatingTarget : MonoBehaviour
   [Tooltip("Particle system prefab spawned on destruction (explosion).")]
   [SerializeField] private GameObject explosionPrefab;
 
+  [Header("Hit Flash")]
+  [Tooltip("Color to flash when hit.")]
+  [SerializeField] private Color flashColor = Color.red;
+
+  [Tooltip("Duration of the hit flash in seconds.")]
+  [SerializeField] private float flashDuration = 0.1f;
+
+  [Header("Debris")]
+  [Tooltip("Number of debris pieces to spawn on death.")]
+  [SerializeField] private int debrisCount = 8;
+
+  [Tooltip("Force applied to debris pieces.")]
+  [SerializeField] private float debrisForce = 15f;
+
+  [Tooltip("How long debris pieces last before being destroyed.")]
+  [SerializeField] private float debrisLifetime = 3f;
+
   /// <summary>Invoked just before the target is destroyed.</summary>
   public event Action OnDestroyed;
 
@@ -44,11 +62,31 @@ public class FloatingTarget : MonoBehaviour
   private float driftTimer;
   private float timeOffset;
 
+  private Renderer[] renderers;
+  private Color[] originalColors;
+  private Coroutine flashCoroutine;
+
   void Start()
   {
     startPosition = transform.position;
     timeOffset = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
     PickNewDriftDirection();
+    CacheRenderers();
+  }
+
+  private void CacheRenderers()
+  {
+    renderers = GetComponentsInChildren<Renderer>();
+    originalColors = new Color[renderers.Length];
+    for (int i = 0; i < renderers.Length; i++)
+    {
+      if (renderers[i].material.HasProperty("_Color"))
+        originalColors[i] = renderers[i].material.color;
+      else if (renderers[i].material.HasProperty("_BaseColor"))
+        originalColors[i] = renderers[i].material.GetColor("_BaseColor");
+      else
+        originalColors[i] = Color.white;
+    }
   }
 
   void Update()
@@ -86,6 +124,8 @@ public class FloatingTarget : MonoBehaviour
         Destroy(fx, 3f);
       }
 
+      SpawnDebris();
+
       // Destroy sound (played at position so it outlives this object)
       if (destroySound != null)
         AudioSource.PlayClipAtPoint(destroySound, transform.position);
@@ -98,6 +138,72 @@ public class FloatingTarget : MonoBehaviour
       // Hit sound
       if (hitSound != null)
         AudioSource.PlayClipAtPoint(hitSound, transform.position);
+
+      TriggerFlash();
+    }
+  }
+
+  private void TriggerFlash()
+  {
+    if (flashCoroutine != null)
+      StopCoroutine(flashCoroutine);
+    flashCoroutine = StartCoroutine(FlashRoutine());
+  }
+
+  private IEnumerator FlashRoutine()
+  {
+    SetRenderersColor(flashColor);
+    yield return new WaitForSeconds(flashDuration);
+    RestoreRenderersColor();
+    flashCoroutine = null;
+  }
+
+  private void SetRenderersColor(Color color)
+  {
+    foreach (var rend in renderers)
+    {
+      if (rend == null) continue;
+      if (rend.material.HasProperty("_Color"))
+        rend.material.color = color;
+      else if (rend.material.HasProperty("_BaseColor"))
+        rend.material.SetColor("_BaseColor", color);
+    }
+  }
+
+  private void RestoreRenderersColor()
+  {
+    for (int i = 0; i < renderers.Length; i++)
+    {
+      if (renderers[i] == null) continue;
+      if (renderers[i].material.HasProperty("_Color"))
+        renderers[i].material.color = originalColors[i];
+      else if (renderers[i].material.HasProperty("_BaseColor"))
+        renderers[i].material.SetColor("_BaseColor", originalColors[i]);
+    }
+  }
+
+  private void SpawnDebris()
+  {
+    for (int i = 0; i < debrisCount; i++)
+    {
+      GameObject debris = GameObject.CreatePrimitive(PrimitiveType.Cube);
+      debris.transform.position = transform.position + UnityEngine.Random.insideUnitSphere * 0.5f;
+      debris.transform.localScale = Vector3.one * UnityEngine.Random.Range(0.3f, 0.8f);
+      debris.transform.rotation = UnityEngine.Random.rotation;
+
+      // Copy color from original
+      Renderer debrisRend = debris.GetComponent<Renderer>();
+      if (renderers.Length > 0 && renderers[0] != null)
+        debrisRend.material.color = originalColors[0];
+
+      Rigidbody rb = debris.AddComponent<Rigidbody>();
+      Vector3 explosionDir = (debris.transform.position - transform.position).normalized;
+      if (explosionDir.sqrMagnitude < 0.01f)
+        explosionDir = UnityEngine.Random.onUnitSphere;
+      rb.AddForce(explosionDir * debrisForce + Vector3.up * debrisForce * 0.5f, ForceMode.Impulse);
+      rb.AddTorque(UnityEngine.Random.insideUnitSphere * 10f, ForceMode.Impulse);
+
+      Destroy(debris, debrisLifetime);
     }
   }
 }

@@ -612,6 +612,11 @@ MonoBehaviour:
   hitSound: {fileID: 8300000, guid: e5f55284d5888e54a9defc4b599f9e04, type: 3}
   destroySound: {fileID: 8300000, guid: f86a28617ce6c8c41a037089d3f3f0fd, type: 3}
   explosionPrefab: {fileID: 0}
+  flashColor: {r: 1, g: 0, b: 0, a: 1}
+  flashDuration: 0.1
+  debrisCount: 8
+  debrisForce: 15
+  debrisLifetime: 3
 --- !u!135 &623765762
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1007,7 +1012,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19e74e7bfdfd5cc4dbcd8d9ff5b56397, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HelicopterController
-  jumpVelocity: 15
+  hoverPressRate: 2
+  maxLiftForce: 40
+  maxPressRate: 5
   yawSpeed: 40
   pitchSpeed: 30
   maxPitchAngle: 45
@@ -1025,6 +1032,10 @@ MonoBehaviour:
   hitMarkerSound: {fileID: 8300000, guid: e5f55284d5888e54a9defc4b599f9e04, type: 3}
   bulletTrailPrefab: {fileID: 1624054862}
   trailDuration: 0.08
+  muzzleFlashParticles: {fileID: 0}
+  muzzleFlashLight: {fileID: 0}
+  muzzleFlashIntensity: 3
+  muzzleFlashDuration: 0.05
   fallAcceleration: 10
 --- !u!114 &1174193909
 MonoBehaviour:
@@ -1038,6 +1049,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a40d687c1152f14bb8eb74f919ca138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HelicopterInput
+  rateWindow: 0.5
+  rateDecay: 5
 --- !u!54 &1174193910
 Rigidbody:
   m_ObjectHideFlags: 0

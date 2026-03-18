@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 /// <summary>
 /// Physics-based helicopter controller with shooting.
@@ -66,6 +67,19 @@ public class HelicopterController : MonoBehaviour
 
     [Tooltip("How long the bullet trail is visible (seconds).")]
     [SerializeField] private float trailDuration = 0.08f;
+
+    [Header("Muzzle Flash")]
+    [Tooltip("Particle system for muzzle flash effect (optional).")]
+    [SerializeField] private ParticleSystem muzzleFlashParticles;
+
+    [Tooltip("Light component for muzzle flash (optional, will be created if null).")]
+    [SerializeField] private Light muzzleFlashLight;
+
+    [Tooltip("Intensity of the muzzle flash light.")]
+    [SerializeField] private float muzzleFlashIntensity = 3f;
+
+    [Tooltip("Duration of muzzle flash light.")]
+    [SerializeField] private float muzzleFlashDuration = 0.05f;
 
     [Header("Gravity")]
     [Tooltip("Extra downward acceleration on top of normal gravity (helicopter falls when not tapping jump).")]
@@ -165,6 +179,9 @@ public class HelicopterController : MonoBehaviour
         if (shootSound != null && shootAudioSource != null)
             shootAudioSource.PlayOneShot(shootSound);
 
+        // Muzzle flash
+        TriggerMuzzleFlash(origin);
+
         Vector3 endPoint = origin + direction * maxRange;
         bool didHit = Physics.Raycast(origin, direction, out RaycastHit hit, maxRange, hitLayers);
 
@@ -181,11 +198,59 @@ public class HelicopterController : MonoBehaviour
                 if (hitMarkerSound != null && shootAudioSource != null)
                     shootAudioSource.PlayOneShot(hitMarkerSound);
             }
+
+            SpawnHitEffect(hit.point, hit.normal);
         }
 
         // Bullet trail
         if (bulletTrailPrefab != null)
             SpawnTrail(origin, endPoint);
+    }
+
+    private void TriggerMuzzleFlash(Vector3 position)
+    {
+        if (muzzleFlashParticles != null)
+            muzzleFlashParticles.Play();
+
+        if (muzzleFlashLight != null)
+            StartCoroutine(FlashLightRoutine());
+        else
+            StartCoroutine(CreateTemporaryFlash(position));
+    }
+
+    private IEnumerator FlashLightRoutine()
+    {
+        muzzleFlashLight.intensity = muzzleFlashIntensity;
+        yield return new WaitForSeconds(muzzleFlashDuration);
+        muzzleFlashLight.intensity = 0f;
+    }
+
+    private IEnumerator CreateTemporaryFlash(Vector3 position)
+    {
+        GameObject flashObj = new GameObject("MuzzleFlash");
+        flashObj.transform.position = position;
+        Light flash = flashObj.AddComponent<Light>();
+        flash.type = LightType.Point;
+        flash.color = new Color(1f, 0.8f, 0.4f);
+        flash.intensity = muzzleFlashIntensity;
+        flash.range = 10f;
+
+        yield return new WaitForSeconds(muzzleFlashDuration);
+        Destroy(flashObj);
+    }
+
+    private void SpawnHitEffect(Vector3 position, Vector3 normal)
+    {
+        GameObject hitObj = new GameObject("HitSpark");
+        hitObj.transform.position = position;
+
+        Light hitLight = hitObj.AddComponent<Light>();
+        hitLight.type = LightType.Point;
+        hitLight.color = Color.yellow;
+        hitLight.intensity = 2f;
+        hitLight.range = 5f;
+
+        Destroy(hitObj, 0.05f);
     }
 
     private void SpawnTrail(Vector3 start, Vector3 end)
