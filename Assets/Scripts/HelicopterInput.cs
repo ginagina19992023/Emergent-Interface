@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 /// <summary>
 /// Reads input via the new Input System and exposes normalized helicopter control values.
 /// Attach to the same GameObject as HelicopterController.
 /// Uses the existing InputSystem_Actions asset:
 ///   Move  (WASD / stick)  → Yaw (X) + Pitch (Y)
-///   Jump  (Space)         → Each click adds upward velocity (release required between presses; holding does nothing).
+///   Jump  (Space)         → Press rate determines vertical momentum (fast = rise, medium = hover, slow = fall).
 ///   Attack (Left Mouse)   → Shoot
 /// </summary>
 [RequireComponent(typeof(PlayerInput))]
@@ -16,12 +17,22 @@ public class HelicopterInput : MonoBehaviour
   public float Pitch { get; private set; }
   public bool ShootPressed { get; private set; }
 
+  /// <summary>
+  /// Current button press rate (presses per second), smoothed over a sliding window.
+  /// </summary>
+  public float PressRate { get; private set; }
+
+  [Tooltip("Time window (seconds) over which button presses are counted to calculate rate.")]
+  [SerializeField] private float rateWindow = 1f;
+
+  [Tooltip("How quickly the press rate decays when no new presses occur.")]
+  [SerializeField] private float rateDecay = 3f;
+
   private InputAction moveAction;
   private InputAction jumpAction;
   private InputAction attackAction;
 
-  private bool jumpPressedThisFrame;
-  /// <summary>True after a jump is consumed until the button is released, so the next press only counts after release.</summary>
+  private readonly Queue<float> pressTimestamps = new Queue<float>();
   private bool jumpNeedsRelease;
 
   void Awake()
@@ -41,21 +52,29 @@ public class HelicopterInput : MonoBehaviour
     if (jumpAction.WasReleasedThisFrame())
       jumpNeedsRelease = false;
 
-    // Only count a new jump press after the button was released since the last counted press (no benefit from holding).
     if (jumpAction.WasPressedThisFrame() && !jumpNeedsRelease)
-      jumpPressedThisFrame = true;
+    {
+      pressTimestamps.Enqueue(Time.time);
+      jumpNeedsRelease = true;
+    }
+
+    UpdatePressRate();
 
     ShootPressed = attackAction.WasPressedThisFrame();
   }
 
-  /// <summary>
-  /// Returns true once per jump click; consumed so the controller can add one upward impulse per tap. Holding does nothing.
-  /// </summary>
-  public bool ConsumeJumpPressed()
+  private void UpdatePressRate()
   {
-    if (!jumpPressedThisFrame) return false;
-    jumpPressedThisFrame = false;
-    jumpNeedsRelease = true;
-    return true;
+    float windowStart = Time.time - rateWindow;
+
+    while (pressTimestamps.Count > 0 && pressTimestamps.Peek() < windowStart)
+      pressTimestamps.Dequeue();
+
+    float targetRate = pressTimestamps.Count / rateWindow;
+
+    if (targetRate > PressRate)
+      PressRate = targetRate;
+    else
+      PressRate = Mathf.MoveTowards(PressRate, targetRate, rateDecay * Time.deltaTime);
   }
 }

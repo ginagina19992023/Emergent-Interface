@@ -1014,8 +1014,8 @@ MonoBehaviour:
   rollStabilization: 2
   linearDrag: 1
   angularDrag: 4
-  maxRange: 10000
-  damage: 1
+  maxRange: 100000
+  damage: 2
   firePoint: {fileID: 1174193914}
   hitLayers:
     serializedVersion: 2

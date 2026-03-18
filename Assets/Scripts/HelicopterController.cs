@@ -8,9 +8,15 @@ using UnityEngine;
 [RequireComponent(typeof(HelicopterInput))]
 public class HelicopterController : MonoBehaviour
 {
-    [Header("Jump (tap to rise)")]
-    [Tooltip("Upward velocity added per jump click. Tuned so ~1 press per second keeps the helicopter hovering (with default gravity + fall).")]
-    [SerializeField] private float jumpVelocity = 25f;
+    [Header("Lift (press rate controls altitude)")]
+    [Tooltip("Press rate (presses/sec) needed to hover. Below this = fall, above = rise.")]
+    [SerializeField] private float hoverPressRate = 2f;
+
+    [Tooltip("Maximum lift force when pressing at max rate.")]
+    [SerializeField] private float maxLiftForce = 40f;
+
+    [Tooltip("Press rate considered 'max' for full lift force.")]
+    [SerializeField] private float maxPressRate = 5f;
 
     [Header("Rotation")]
     [Tooltip("Degrees per second of yaw rotation.")]
@@ -80,13 +86,27 @@ public class HelicopterController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (input.ConsumeJumpPressed())
-            rb.AddForce(transform.up * jumpVelocity, ForceMode.VelocityChange);
-
+        ApplyLift();
         ApplyFall();
         ApplyYaw();
         ApplyPitch();
         StabilizeRoll();
+    }
+
+    private void ApplyLift()
+    {
+        float pressRate = input.PressRate;
+
+        float liftNormalized = Mathf.InverseLerp(0f, maxPressRate, pressRate);
+        float hoverNormalized = Mathf.InverseLerp(0f, maxPressRate, hoverPressRate);
+
+        float liftForce = Mathf.Lerp(-fallAcceleration, maxLiftForce, liftNormalized);
+
+        float hoverForce = Mathf.Lerp(-fallAcceleration, maxLiftForce, hoverNormalized);
+
+        float netForce = liftForce - hoverForce;
+
+        rb.AddForce(transform.up * netForce, ForceMode.Acceleration);
     }
 
     void Update()
