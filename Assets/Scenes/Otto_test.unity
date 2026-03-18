@@ -993,6 +993,7 @@ GameObject:
   - component: {fileID: 1174193909}
   - component: {fileID: 1174193908}
   - component: {fileID: 1174193915}
+  - component: {fileID: 1174193916}
   m_Layer: 0
   m_Name: Helicopter
   m_TagString: Untagged
@@ -1015,10 +1016,17 @@ MonoBehaviour:
   hoverPressRate: 2
   maxLiftForce: 40
   maxPressRate: 5
+  forwardSpeed: 5
+  defaultPitchAngle: 5
+  enableShake: 1
+  positionShakeIntensity: 0.05
+  rotationShakeIntensity: 0.5
+  shakeSpeed: 15
   yawSpeed: 40
   pitchSpeed: 30
   maxPitchAngle: 45
   rollStabilization: 2
+  pitchStabilization: 1
   linearDrag: 1
   angularDrag: 4
   maxRange: 100000
@@ -1203,6 +1211,28 @@ MonoBehaviour:
   m_DefaultActionMap: 
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &1174193916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174193907}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ac8b9546fe42b8438a1828ea01e03af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HelicopterRotor
+  bladeCount: 2
+  bladeLength: 3
+  bladeWidth: 0.3
+  bladeThickness: 0.05
+  heightOffset: 0.55
+  minSpinSpeed: 100
+  maxSpinSpeed: 2000
+  spinAcceleration: 10
+  bladeColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+  bladeMaterial: {fileID: 0}
 --- !u!1 &1240305796
 GameObject:
   m_ObjectHideFlags: 0
