@@ -16,3 +16,4 @@
 *.pidb
 *.booproj
 *.svntmp
+.venv
