@@ -19,6 +19,26 @@ public class HelicopterController : MonoBehaviour
     [Tooltip("Press rate considered 'max' for full lift force.")]
     [SerializeField] private float maxPressRate = 5f;
 
+    [Header("Forward Movement")]
+    [Tooltip("Constant forward speed applied to the helicopter.")]
+    [SerializeField] private float forwardSpeed = 5f;
+
+    [Tooltip("Default downward pitch angle in degrees (helicopter nose points slightly down).")]
+    [SerializeField] private float defaultPitchAngle = 5f;
+
+    [Header("Shake")]
+    [Tooltip("Enable movement shake for a more dynamic feel.")]
+    [SerializeField] private bool enableShake = true;
+
+    [Tooltip("Intensity of position shake.")]
+    [SerializeField] private float positionShakeIntensity = 0.05f;
+
+    [Tooltip("Intensity of rotation shake in degrees.")]
+    [SerializeField] private float rotationShakeIntensity = 0.5f;
+
+    [Tooltip("Speed of the shake oscillation.")]
+    [SerializeField] private float shakeSpeed = 15f;
+
     [Header("Rotation")]
     [Tooltip("Degrees per second of yaw rotation.")]
     [SerializeField] private float yawSpeed = 120f;
@@ -32,6 +52,9 @@ public class HelicopterController : MonoBehaviour
     [Header("Stability")]
     [Tooltip("How quickly the helicopter returns to level roll (0 = never, higher = faster).")]
     [SerializeField] private float rollStabilization = 2f;
+
+    [Tooltip("How quickly the helicopter returns to default pitch when not pitching (0 = never).")]
+    [SerializeField] private float pitchStabilization = 1f;
 
     [Tooltip("Linear drag applied by the Rigidbody (set on Start).")]
     [SerializeField] private float linearDrag = 1f;
@@ -88,6 +111,10 @@ public class HelicopterController : MonoBehaviour
     private Rigidbody rb;
     private HelicopterInput input;
 
+    private float noiseOffsetX;
+    private float noiseOffsetY;
+    private float noiseOffsetZ;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -96,15 +123,22 @@ public class HelicopterController : MonoBehaviour
         rb.useGravity = true;
         rb.linearDamping = linearDrag;
         rb.angularDamping = angularDrag;
+
+        noiseOffsetX = Random.Range(0f, 100f);
+        noiseOffsetY = Random.Range(0f, 100f);
+        noiseOffsetZ = Random.Range(0f, 100f);
     }
 
     void FixedUpdate()
     {
         ApplyLift();
         ApplyFall();
+        ApplyForwardMovement();
         ApplyYaw();
         ApplyPitch();
         StabilizeRoll();
+        StabilizePitch();
+        ApplyShake();
     }
 
     private void ApplyLift()
@@ -160,7 +194,6 @@ public class HelicopterController : MonoBehaviour
 
     private void StabilizeRoll()
     {
-        // Gradually zero out roll so the helicopter stays level on the Z axis
         Vector3 euler = rb.rotation.eulerAngles;
         float roll = euler.z;
         if (roll > 180f) roll -= 360f;
@@ -168,6 +201,45 @@ public class HelicopterController : MonoBehaviour
         float correction = -roll * rollStabilization * Time.fixedDeltaTime;
         Quaternion rollCorrection = Quaternion.Euler(0f, 0f, correction);
         rb.MoveRotation(rb.rotation * rollCorrection);
+    }
+
+    private void ApplyForwardMovement()
+    {
+        if (forwardSpeed > 0f)
+            rb.AddForce(transform.forward * forwardSpeed, ForceMode.Acceleration);
+    }
+
+    private void StabilizePitch()
+    {
+        if (pitchStabilization <= 0f) return;
+        if (Mathf.Abs(input.Pitch) > 0.1f) return;
+
+        Vector3 euler = rb.rotation.eulerAngles;
+        float currentPitch = euler.x;
+        if (currentPitch > 180f) currentPitch -= 360f;
+
+        float pitchDiff = defaultPitchAngle - currentPitch;
+        float correction = pitchDiff * pitchStabilization * Time.fixedDeltaTime;
+        Quaternion pitchCorrection = Quaternion.Euler(correction, 0f, 0f);
+        rb.MoveRotation(rb.rotation * pitchCorrection);
+    }
+
+    private void ApplyShake()
+    {
+        if (!enableShake) return;
+
+        float time = Time.time * shakeSpeed;
+
+        float shakeX = (Mathf.PerlinNoise(time, noiseOffsetX) - 0.5f) * 2f;
+        float shakeY = (Mathf.PerlinNoise(time, noiseOffsetY) - 0.5f) * 2f;
+        float shakeZ = (Mathf.PerlinNoise(time, noiseOffsetZ) - 0.5f) * 2f;
+
+        Vector3 positionShake = new Vector3(shakeX, shakeY, shakeZ) * positionShakeIntensity;
+        rb.AddForce(positionShake, ForceMode.VelocityChange);
+
+        Vector3 rotationShake = new Vector3(shakeX, shakeY, shakeZ) * rotationShakeIntensity;
+        Quaternion shakeRotation = Quaternion.Euler(rotationShake * Time.fixedDeltaTime);
+        rb.MoveRotation(rb.rotation * shakeRotation);
     }
 
     private void Shoot()
