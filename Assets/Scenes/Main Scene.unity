@@ -1082,7 +1082,7 @@ MonoBehaviour:
   muzzleFlashLight: {fileID: 0}
   muzzleFlashIntensity: 3
   muzzleFlashDuration: 0.05
-  fallAcceleration: 10
+  fallAcceleration: 1
 --- !u!114 &1174193909
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1096,7 +1096,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HelicopterInput
   rateWindow: 0.5
-  rateDecay: 2
+  rateDecay: 5
 --- !u!54 &1174193910
 Rigidbody:
   m_ObjectHideFlags: 0
