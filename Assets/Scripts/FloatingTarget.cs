@@ -3,24 +3,23 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// A floating target that drifts around slowly like a hot-air balloon.
-/// It bobs up and down with a sine wave and wanders horizontally.
+/// Target that can stay still or move back and forth between two points (offsets from its spawn position) at a set speed.
 /// Destroyed when it has taken enough hits.
 /// </summary>
 public class FloatingTarget : MonoBehaviour
 {
-  [Header("Floating Motion")]
-  [Tooltip("Amplitude of the vertical bobbing in units.")]
-  [SerializeField] private float bobAmplitude = 3f;
+  [Header("Movement")]
+  [Tooltip("If true, the target does not move.")]
+  [SerializeField] private bool stationary = true;
 
-  [Tooltip("Speed of the vertical bobbing cycle.")]
-  [SerializeField] private float bobSpeed = 0.5f;
+  [Tooltip("Offset from the target's starting position to the first path endpoint.")]
+  [SerializeField] private Vector3 pointA;
 
-  [Tooltip("Maximum horizontal drift speed.")]
-  [SerializeField] private float driftSpeed = 2f;
+  [Tooltip("Offset from the target's starting position to the second path endpoint.")]
+  [SerializeField] private Vector3 pointB;
 
-  [Tooltip("How often the drift direction changes (seconds).")]
-  [SerializeField] private float driftChangeInterval = 4f;
+  [Tooltip("Travel speed along the segment, in units per second.")]
+  [SerializeField] private float moveSpeed = 2f;
 
   [Header("Health")]
   [Tooltip("How many hit points the target has.")]
@@ -57,21 +56,48 @@ public class FloatingTarget : MonoBehaviour
   /// <summary>Invoked just before the target is destroyed.</summary>
   public event Action OnDestroyed;
 
-  private Vector3 startPosition;
-  private Vector3 driftDirection;
-  private float driftTimer;
-  private float timeOffset;
-
   private Renderer[] renderers;
   private Color[] originalColors;
   private Coroutine flashCoroutine;
 
+  /// <summary>Accumulated motion along the path; PingPong(phase, 1) is the Lerp t between A and B.</summary>
+  private float pathPhase;
+
+  /// <summary>World position where the target was at spawn (movement path is relative to this).</summary>
+  private Vector3 pathOrigin;
+
+  void Awake()
+  {
+    pathOrigin = transform.position;
+  }
+
   void Start()
   {
-    startPosition = transform.position;
-    timeOffset = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
-    PickNewDriftDirection();
     CacheRenderers();
+    if (!stationary && moveSpeed > 0f)
+      pathPhase = GetPhaseForCurrentPosition();
+  }
+
+  private Vector3 WorldPointA => pathOrigin + pointA;
+  private Vector3 WorldPointB => pathOrigin + pointB;
+
+  /// <summary>Phase value such that Lerp(world A, world B, PingPong(phase,1)) matches the closest point on the segment to this transform.</summary>
+  private float GetPhaseForCurrentPosition()
+  {
+    Vector3 a = WorldPointA;
+    Vector3 b = WorldPointB;
+    Vector3 ab = b - a;
+    float spanSq = ab.sqrMagnitude;
+    if (spanSq < 0.0001f)
+      return 0f;
+    float t = Mathf.Clamp01(Vector3.Dot(transform.position - a, ab) / spanSq);
+    return t;
+  }
+
+  void OnValidate()
+  {
+    if (moveSpeed < 0f)
+      moveSpeed = 0f;
   }
 
   private void CacheRenderers()
@@ -91,24 +117,18 @@ public class FloatingTarget : MonoBehaviour
 
   void Update()
   {
-    // Vertical bobbing
-    float yOffset = Mathf.Sin((Time.time + timeOffset) * bobSpeed) * bobAmplitude;
+    if (stationary || moveSpeed <= 0f)
+      return;
 
-    // Horizontal drift
-    driftTimer -= Time.deltaTime;
-    if (driftTimer <= 0f)
-      PickNewDriftDirection();
+    Vector3 wA = WorldPointA;
+    Vector3 wB = WorldPointB;
+    float span = Vector3.Distance(wA, wB);
+    if (span < 0.0001f)
+      return;
 
-    startPosition += driftDirection * driftSpeed * Time.deltaTime;
-
-    transform.position = startPosition + Vector3.up * yOffset;
-  }
-
-  private void PickNewDriftDirection()
-  {
-    float angle = UnityEngine.Random.Range(0f, 360f);
-    driftDirection = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)).normalized;
-    driftTimer = driftChangeInterval;
+    pathPhase += (moveSpeed / span) * Time.deltaTime;
+    float t = Mathf.PingPong(pathPhase, 1f);
+    transform.position = Vector3.Lerp(wA, wB, t);
   }
 
   public void TakeHit(float damageAmount)
@@ -117,7 +137,6 @@ public class FloatingTarget : MonoBehaviour
 
     if (health <= 0f)
     {
-      // Explosion VFX
       if (explosionPrefab != null)
       {
         GameObject fx = Instantiate(explosionPrefab, transform.position, Quaternion.identity);
@@ -126,7 +145,6 @@ public class FloatingTarget : MonoBehaviour
 
       SpawnDebris();
 
-      // Destroy sound (played at position so it outlives this object)
       if (destroySound != null)
         AudioSource.PlayClipAtPoint(destroySound, transform.position);
 
@@ -135,7 +153,6 @@ public class FloatingTarget : MonoBehaviour
     }
     else
     {
-      // Hit sound
       if (hitSound != null)
         AudioSource.PlayClipAtPoint(hitSound, transform.position);
 
@@ -191,7 +208,6 @@ public class FloatingTarget : MonoBehaviour
       debris.transform.localScale = Vector3.one * UnityEngine.Random.Range(0.3f, 0.8f);
       debris.transform.rotation = UnityEngine.Random.rotation;
 
-      // Copy color from original
       Renderer debrisRend = debris.GetComponent<Renderer>();
       if (renderers.Length > 0 && renderers[0] != null)
         debrisRend.material.color = originalColors[0];
