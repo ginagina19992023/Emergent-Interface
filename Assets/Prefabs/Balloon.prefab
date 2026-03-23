@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7663711986592033}
   - component: {fileID: 1838758317652381028}
   - component: {fileID: 5072530349623656630}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Balloon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -150,7 +150,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3774204838480866311}
   - component: {fileID: 8704605168676993658}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Audio Source
   m_TagString: Untagged
   m_Icon: {fileID: 0}
