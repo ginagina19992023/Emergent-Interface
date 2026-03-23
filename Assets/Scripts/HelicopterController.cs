@@ -72,8 +72,8 @@ public class HelicopterController : MonoBehaviour
     [Tooltip("Transform used as the ray origin. If empty, uses the helicopter's position.")]
     [SerializeField] private Transform firePoint;
 
-    [Tooltip("Layers the hitscan ray can hit.")]
-    [SerializeField] private LayerMask hitLayers = ~0;
+    [Tooltip("Layers the hitscan ray can hit. Default excludes Ignore Raycast (e.g. gates).")]
+    [SerializeField] private LayerMask hitLayers = ~(1 << 2);
 
     [Header("Shoot Effects")]
     [Tooltip("AudioSource used for shooting sounds (should be on the helicopter).")]
