@@ -597,6 +597,7 @@ GameObject:
   - component: {fileID: 174823514}
   - component: {fileID: 174823513}
   - component: {fileID: 174823512}
+  - component: {fileID: 174823516}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -621,6 +622,22 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &174823516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 174823511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8f5b2e0c4e35b6f9d1a2b3c4d5e6f7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScoreDisplay
+  scoreText: {fileID: 0}
+  playerScore: {fileID: 1174193917}
+  prefix: 'Score: '
+  fontSize: 28
 --- !u!114 &174823513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1771,6 +1788,7 @@ GameObject:
   - component: {fileID: 1174193908}
   - component: {fileID: 1174193915}
   - component: {fileID: 1174193916}
+  - component: {fileID: 1174193917}
   m_Layer: 0
   m_Name: Helicopter
   m_TagString: Untagged
@@ -1822,6 +1840,18 @@ MonoBehaviour:
   muzzleFlashIntensity: 3
   muzzleFlashDuration: 0.05
   fallAcceleration: 1
+--- !u!114 &1174193917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174193907}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7e4a1f9b3d24a5e8c0f1b2d3e4f5a6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerScore
 --- !u!114 &1174193909
 MonoBehaviour:
   m_ObjectHideFlags: 0

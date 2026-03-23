@@ -25,6 +25,10 @@ public class FloatingTarget : MonoBehaviour
   [Tooltip("How many hit points the target has.")]
   [SerializeField] private float health = 3f;
 
+  [Header("Score")]
+  [Tooltip("Points added to the player score when this target is destroyed.")]
+  [SerializeField] private int pointsOnDestroy = 100;
+
   [Header("Audio")]
   [Tooltip("Sound played when the target is hit but not destroyed.")]
   [SerializeField] private AudioClip hitSound;
@@ -137,6 +141,9 @@ public class FloatingTarget : MonoBehaviour
 
     if (health <= 0f)
     {
+      if (pointsOnDestroy != 0 && PlayerScore.Instance != null)
+        PlayerScore.Instance.AddScore(pointsOnDestroy);
+
       if (explosionPrefab != null)
       {
         GameObject fx = Instantiate(explosionPrefab, transform.position, Quaternion.identity);

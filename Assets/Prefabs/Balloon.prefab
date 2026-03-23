@@ -126,11 +126,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bb7642960c40264fb73a6cd1e4a1f16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FloatingTarget
-  bobAmplitude: 3
-  bobSpeed: 0.5
-  driftSpeed: 2
-  driftChangeInterval: 4
+  stationary: 0
+  pointA: {x: 0, y: 0, z: 0}
+  pointB: {x: 8, y: 0, z: 0}
+  moveSpeed: 1.5
   health: 10
+  pointsOnDestroy: 100
   hitSound: {fileID: 8300000, guid: e5f55284d5888e54a9defc4b599f9e04, type: 3}
   destroySound: {fileID: 8300000, guid: f86a28617ce6c8c41a037089d3f3f0fd, type: 3}
   explosionPrefab: {fileID: 0}
