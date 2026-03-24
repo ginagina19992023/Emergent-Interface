@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// Tracks the player's score. Place on the player (e.g. helicopter). Other systems add points via <see cref="AddScore"/>.
+/// Tracks the player's score. Lives on the <see cref="GameState"/> object (or any single scene singleton). Other systems add points via <see cref="AddScore"/> or <see cref="Instance"/>.
 /// </summary>
 public class PlayerScore : MonoBehaviour
 {

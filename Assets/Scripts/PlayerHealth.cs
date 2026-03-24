@@ -2,22 +2,24 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// Player health on the helicopter. Solid collisions cost 1 HP (with a short invulnerability window).
+/// Player health (typically on a <see cref="GameState"/> object). Collision damage is forwarded from the helicopter via <see cref="HelicopterCollisionDamage"/>.
 /// </summary>
 public class PlayerHealth : MonoBehaviour
 {
     [Tooltip("Starting and maximum health (adjust in the Inspector).")]
     [SerializeField] private int maxHealth = 5;
 
-    [Tooltip("Seconds after a hit before another collision can deal damage.")]
+    [Tooltip("Seconds after a hit before another collision can deal damage (used by HelicopterCollisionDamage).")]
     [SerializeField] private float hitInvulnerabilitySeconds = 0.35f;
 
     public int MaxHealth => maxHealth;
     public int CurrentHealth { get; private set; }
+    public float HitInvulnerabilitySeconds => hitInvulnerabilitySeconds;
 
     public event Action<int, int> OnHealthChanged;
+    public event Action OnPlayerDied;
 
-    float _invulnerableUntil;
+    bool _deathEventRaised;
 
     void Awake()
     {
@@ -41,18 +43,10 @@ public class PlayerHealth : MonoBehaviour
             return;
         CurrentHealth = Mathf.Max(0, CurrentHealth - amount);
         OnHealthChanged?.Invoke(CurrentHealth, maxHealth);
-    }
-
-    void OnCollisionEnter(Collision collision)
-    {
-        if (!isActiveAndEnabled)
-            return;
-        if (Time.time < _invulnerableUntil)
-            return;
-        if (collision.gameObject.GetComponent<Bullet>() != null)
-            return;
-
-        TakeDamage(1);
-        _invulnerableUntil = Time.time + hitInvulnerabilitySeconds;
+        if (CurrentHealth <= 0 && !_deathEventRaised)
+        {
+            _deathEventRaised = true;
+            OnPlayerDied?.Invoke();
+        }
     }
 }
