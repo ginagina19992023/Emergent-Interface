@@ -28,7 +28,7 @@ public class LevelCompleteUI : MonoBehaviour
         float safeTime = Mathf.Max(timeSec, 0.0001f);
         float fromPoints = points;
         float fromHealth = healthVal * 100f;
-        float fromTime = (1f / safeTime) * 10000f;
+        float fromTime = (1f / safeTime) * 100000f;
         float finalScore = fromPoints + fromHealth + fromTime;
 
         int pointsRounded = Mathf.RoundToInt(fromPoints);
