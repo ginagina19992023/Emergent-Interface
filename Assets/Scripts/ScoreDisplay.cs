@@ -9,7 +9,7 @@ public class ScoreDisplay : MonoBehaviour
 {
   [SerializeField] private Text scoreText;
   [SerializeField] private PlayerScore playerScore;
-  [SerializeField] private string prefix = "Score: ";
+  [SerializeField] private string prefix = "Points: ";
   [SerializeField] private int fontSize = 28;
 
   void Awake()

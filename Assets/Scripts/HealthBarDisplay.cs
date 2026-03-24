@@ -48,7 +48,7 @@ public class HealthBarDisplay : MonoBehaviour
     rt.anchorMin = new Vector2(0f, 1f);
     rt.anchorMax = new Vector2(0f, 1f);
     rt.pivot = new Vector2(0f, 1f);
-    // Stack below ScoreDisplay row (same height as ScoreText: 56).
+    // Stack below points row (same height as ScoreText: 56).
     rt.anchoredPosition = new Vector2(24f, -80f);
     rt.sizeDelta = new Vector2(480f, 56f);
 
