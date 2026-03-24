@@ -25,8 +25,7 @@ public class GoalFinishTrigger : MonoBehaviour
             return;
 
         _completed = true;
-        int score = PlayerScore.Instance != null ? PlayerScore.Instance.Score : 0;
-        levelCompleteUi.Show(score);
+        levelCompleteUi.Show();
     }
 
     static bool TryGetHelicopterRoot(Collider other, out Transform root)
