@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -31,21 +30,24 @@ public class LevelCompleteUI : MonoBehaviour
         float fromHealth = healthVal * 100f;
         float fromTime = (1f / safeTime) * 10000f;
         float finalScore = fromPoints + fromHealth + fromTime;
-        float finalScoreRounded = (float)Math.Round((double)finalScore, 1);
 
+        int pointsRounded = Mathf.RoundToInt(fromPoints);
+        int healthRounded = Mathf.RoundToInt(fromHealth);
+        int timeContribRounded = Mathf.RoundToInt(fromTime);
+        int timeSecRounded = Mathf.RoundToInt(timeSec);
+        int finalRounded = Mathf.RoundToInt(finalScore);
+
+        const string yellow = "#FFEB3B";
         if (detailsText != null)
         {
             detailsText.text =
-                $"Points: {points}\n" +
-                $"Health: {healthVal}\n" +
-                $"Time: {timeSec:F2} s\n\n" +
-                $"From points: +{fromPoints:N0}\n" +
-                $"From health: +{fromHealth:N0}\n" +
-                $"From time: +{fromTime:N1}";
+                $"Points: {pointsRounded}  <color={yellow}>+{pointsRounded}</color>\n" +
+                $"Health: {healthVal}  <color={yellow}>+{healthRounded}</color>\n" +
+                $"Time: {timeSecRounded} s  <color={yellow}>+{timeContribRounded}</color>";
         }
 
         if (finalScoreValueText != null)
-            finalScoreValueText.text = finalScoreRounded.ToString("N1");
+            finalScoreValueText.text = finalRounded.ToString("N0");
 
         SetOverlayVisible(true);
         Time.timeScale = 0f;
@@ -113,8 +115,12 @@ public class LevelCompleteUI : MonoBehaviour
         detailsText.font = font;
         detailsText.fontSize = 26;
         detailsText.color = new Color(0.95f, 0.95f, 0.95f);
+        detailsText.supportRichText = true;
         detailsText.alignment = TextAnchor.MiddleCenter;
-        detailsText.text = "Points: 0\nHealth: 0\nTime: 0.00 s";
+        detailsText.text =
+            "Points: 0  <color=#FFEB3B>+0</color>\n" +
+            "Health: 0  <color=#FFEB3B>+0</color>\n" +
+            "Time: 0 s  <color=#FFEB3B>+0</color>";
 
         GameObject finalLabelGo = new GameObject("FinalScoreLabel");
         finalLabelGo.transform.SetParent(overlayRoot.transform, false);
