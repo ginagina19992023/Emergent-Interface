@@ -50,9 +50,6 @@ public class HelicopterController : MonoBehaviour
     [SerializeField] private float maxPitchAngle = 45f;
 
     [Header("Stability")]
-    [Tooltip("How quickly the helicopter returns to level roll (0 = never, higher = faster).")]
-    [SerializeField] private float rollStabilization = 2f;
-
     [Tooltip("How quickly the helicopter returns to default pitch when not pitching (0 = never).")]
     [SerializeField] private float pitchStabilization = 1f;
 
@@ -61,6 +58,13 @@ public class HelicopterController : MonoBehaviour
 
     [Tooltip("Angular drag applied by the Rigidbody (set on Start).")]
     [SerializeField] private float angularDrag = 4f;
+
+    [Header("Upright (collision stability)")]
+    [Tooltip("Each physics step, force world roll (euler Z) to zero so bumps cannot bank the craft.")]
+    [SerializeField] private bool enforceUprightNoRoll = true;
+
+    [Tooltip("When not pitching, damp pitch angular velocity from collisions (per second, higher = faster decay). 0 = off.")]
+    [SerializeField] private float idlePitchAngularVelocityDamping = 10f;
 
     [Header("Shooting (Hitscan)")]
     [Tooltip("Maximum range of the hitscan weapon.")]
@@ -136,9 +140,10 @@ public class HelicopterController : MonoBehaviour
         ApplyForwardMovement();
         ApplyYaw();
         ApplyPitch();
-        StabilizeRoll();
         StabilizePitch();
         ApplyShake();
+        EnforceUprightStability();
+        EnforceZeroWorldRoll();
     }
 
     private void ApplyLift()
@@ -190,17 +195,6 @@ public class HelicopterController : MonoBehaviour
 
         desiredEuler.x = normalizedPitch;
         rb.MoveRotation(Quaternion.Euler(desiredEuler));
-    }
-
-    private void StabilizeRoll()
-    {
-        Vector3 euler = rb.rotation.eulerAngles;
-        float roll = euler.z;
-        if (roll > 180f) roll -= 360f;
-
-        float correction = -roll * rollStabilization * Time.fixedDeltaTime;
-        Quaternion rollCorrection = Quaternion.Euler(0f, 0f, correction);
-        rb.MoveRotation(rb.rotation * rollCorrection);
     }
 
     private void ApplyForwardMovement()
@@ -267,9 +261,31 @@ public class HelicopterController : MonoBehaviour
         Vector3 positionShake = new Vector3(shakeX, shakeY, shakeZ) * positionShakeIntensity;
         rb.AddForce(positionShake, ForceMode.VelocityChange);
 
-        Vector3 rotationShake = new Vector3(shakeX, shakeY, shakeZ) * rotationShakeIntensity;
+        // No roll component — keeps the body level with freezeWorldRoll / upright feel
+        Vector3 rotationShake = new Vector3(shakeX, shakeY, 0f) * rotationShakeIntensity;
         Quaternion shakeRotation = Quaternion.Euler(rotationShake * Time.fixedDeltaTime);
         rb.MoveRotation(rb.rotation * shakeRotation);
+    }
+
+    private void EnforceUprightStability()
+    {
+        Vector3 av = rb.angularVelocity;
+        av.z = 0f;
+        if (idlePitchAngularVelocityDamping > 0f && Mathf.Abs(input.Pitch) < 0.1f)
+        {
+            float damp = Mathf.Exp(-idlePitchAngularVelocityDamping * Time.fixedDeltaTime);
+            av.x *= damp;
+        }
+        rb.angularVelocity = av;
+    }
+
+    private void EnforceZeroWorldRoll()
+    {
+        if (!enforceUprightNoRoll)
+            return;
+        Vector3 e = rb.rotation.eulerAngles;
+        e.z = 0f;
+        rb.MoveRotation(Quaternion.Euler(e));
     }
 
     private void Shoot()
