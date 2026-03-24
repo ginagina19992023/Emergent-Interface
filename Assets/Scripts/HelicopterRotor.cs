@@ -40,10 +40,22 @@ public class HelicopterRotor : MonoBehaviour
     [Tooltip("Material for the blades (if null, uses default unlit material).")]
     [SerializeField] private Material bladeMaterial;
 
+    private static Mesh _unitCubeMesh;
+
     private HelicopterInput helicopterInput;
     private Transform rotorHub;
     private float currentSpinSpeed;
     private float maxPressRate = 5f;
+
+    static Mesh GetUnitCubeMesh()
+    {
+        if (_unitCubeMesh != null)
+            return _unitCubeMesh;
+        var temp = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        _unitCubeMesh = temp.GetComponent<MeshFilter>().sharedMesh;
+        Destroy(temp);
+        return _unitCubeMesh;
+    }
 
     void Start()
     {
@@ -80,23 +92,22 @@ public class HelicopterRotor : MonoBehaviour
         }
 
         float angleStep = 360f / bladeCount;
+        Mesh cubeMesh = GetUnitCubeMesh();
 
         for (int i = 0; i < bladeCount; i++)
         {
-            GameObject blade = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            blade.name = $"Blade_{i}";
+            GameObject blade = new GameObject($"Blade_{i}");
             blade.transform.SetParent(rotorHub);
 
             blade.transform.localScale = new Vector3(bladeLength, bladeThickness, bladeWidth);
             blade.transform.localPosition = Vector3.zero;
             blade.transform.localRotation = Quaternion.Euler(0f, angleStep * i, 0f);
 
-            Renderer renderer = blade.GetComponent<Renderer>();
+            var meshFilter = blade.AddComponent<MeshFilter>();
+            meshFilter.sharedMesh = cubeMesh;
+            var renderer = blade.AddComponent<MeshRenderer>();
             renderer.material = mat;
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-
-            Collider col = blade.GetComponent<Collider>();
-            if (col != null) Destroy(col);
         }
     }
 
