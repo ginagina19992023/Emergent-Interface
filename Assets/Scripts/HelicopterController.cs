@@ -112,6 +112,25 @@ public class HelicopterController : MonoBehaviour
     [Tooltip("Extra downward acceleration on top of normal gravity (helicopter falls when not tapping jump).")]
     [SerializeField] private float fallAcceleration = 15f;
 
+    [Header("Wall collision (head-on)")]
+    [Tooltip("When dot(forward, contact normal) is below this (more negative = stricter head-on), treat as driving straight into the wall.")]
+    [SerializeField] private float wallHeadOnDotThreshold = -0.45f;
+
+    [Tooltip("Extra velocity (m/s) pushed along the wall normal away from the surface when head-on (per physics step while colliding).")]
+    [SerializeField] private float wallPushAwayImpulse = 1.2f;
+
+    [Tooltip("Forward ray length from the probe start; forward thrust is reduced when head-on.")]
+    [SerializeField] private float wallForwardProbeDistance = 2.5f;
+
+    [Tooltip("Start the probe this far along forward from the pivot so the ray does not hit the helicopter collider.")]
+    [SerializeField] private float wallProbeForwardInset = 0.75f;
+
+    [Tooltip("Layers checked by the forward wall probe (triggers ignored).")]
+    [SerializeField] private LayerMask wallProbeLayers = ~(1 << 2);
+
+    [Tooltip("Multiplier for forward acceleration while the probe reports a head-on wall (0 = stop pushing into it so you can yaw away).")]
+    [SerializeField] private float forwardAccelWhenHeadOnWall = 0f;
+
     private Rigidbody rb;
     private HelicopterInput input;
 
@@ -199,8 +218,61 @@ public class HelicopterController : MonoBehaviour
 
     private void ApplyForwardMovement()
     {
-        if (forwardSpeed > 0f)
-            rb.AddForce(transform.forward * forwardSpeed, ForceMode.Acceleration);
+        if (forwardSpeed <= 0f)
+            return;
+
+        float accel = forwardSpeed;
+
+        if (wallForwardProbeDistance > 0f &&
+            Physics.Raycast(
+                transform.position + transform.forward * Mathf.Max(0f, wallProbeForwardInset),
+                transform.forward, out RaycastHit wallHit,
+                wallForwardProbeDistance, wallProbeLayers, QueryTriggerInteraction.Ignore))
+        {
+            // Normal points out of the wall; flying straight in means strong negative dot.
+            float approach = Vector3.Dot(transform.forward, wallHit.normal);
+            if (approach < wallHeadOnDotThreshold)
+                accel *= forwardAccelWhenHeadOnWall;
+        }
+
+        if (accel > 0f)
+            rb.AddForce(transform.forward * accel, ForceMode.Acceleration);
+    }
+
+    void OnCollisionStay(Collision collision)
+    {
+        if (!collision.collider || collision.collider.isTrigger)
+            return;
+
+        Vector3 normalSum = Vector3.zero;
+        int headOnContacts = 0;
+
+        int count = collision.contactCount;
+        for (int i = 0; i < count; i++)
+        {
+            ContactPoint cp = collision.GetContact(i);
+            if (Vector3.Dot(transform.forward, cp.normal) < wallHeadOnDotThreshold)
+            {
+                normalSum += cp.normal;
+                headOnContacts++;
+            }
+        }
+
+        if (headOnContacts == 0)
+            return;
+
+        Vector3 away = (normalSum / headOnContacts).normalized;
+        if (away.sqrMagnitude < 1e-6f)
+            return;
+
+        Vector3 v = rb.linearVelocity;
+        float intoWall = Vector3.Dot(v, away);
+        if (intoWall < 0f)
+            v -= away * intoWall;
+        rb.linearVelocity = v;
+
+        if (wallPushAwayImpulse > 0f)
+            rb.AddForce(away * wallPushAwayImpulse, ForceMode.VelocityChange);
     }
 
     /// <summary>
