@@ -209,6 +209,36 @@ public class HelicopterController : MonoBehaviour
             rb.AddForce(transform.forward * forwardSpeed, ForceMode.Acceleration);
     }
 
+    /// <summary>
+    /// Instant kick plus short sustained acceleration along a world direction (e.g. helicopter forward from a boost gate).
+    /// Uses FixedUpdate-aligned forces so it stays consistent with physics.
+    /// </summary>
+    public void ApplyDirectionalBoost(Vector3 worldDirection, float velocityImpulse, float sustainedAcceleration, float duration)
+    {
+        if (rb == null)
+            rb = GetComponent<Rigidbody>();
+        if (worldDirection.sqrMagnitude < 1e-6f)
+            worldDirection = transform.forward;
+        else
+            worldDirection.Normalize();
+
+        if (velocityImpulse != 0f)
+            rb.AddForce(worldDirection * velocityImpulse, ForceMode.VelocityChange);
+        if (sustainedAcceleration > 0f && duration > 0f)
+            StartCoroutine(DirectionalBoostRoutine(worldDirection, sustainedAcceleration, duration));
+    }
+
+    IEnumerator DirectionalBoostRoutine(Vector3 direction, float acceleration, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            rb.AddForce(direction * acceleration, ForceMode.Acceleration);
+            elapsed += Time.fixedDeltaTime;
+            yield return new WaitForFixedUpdate();
+        }
+    }
+
     private void StabilizePitch()
     {
         if (pitchStabilization <= 0f) return;
