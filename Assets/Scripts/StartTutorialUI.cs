@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Full-screen tutorial/start overlay shown on scene load. Gameplay is paused until dismissed via Play or Space.
@@ -9,8 +10,23 @@ using UnityEngine.InputSystem;
 public class StartTutorialUI : MonoBehaviour
 {
     GameObject overlayRoot;
+    static bool sceneHookRegistered;
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    static void RegisterSceneHook()
+    {
+        if (sceneHookRegistered)
+            return;
+
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+        sceneHookRegistered = true;
+    }
+
+    static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        EnsureInstanceExists();
+    }
+
     static void EnsureInstanceExists()
     {
         if (FindFirstObjectByType<StartTutorialUI>() != null)
