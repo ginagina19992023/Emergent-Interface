@@ -12,6 +12,16 @@ public class PlayerHealth : MonoBehaviour
     [Tooltip("Seconds after a hit before another collision can deal damage (used by HelicopterCollisionDamage).")]
     [SerializeField] private float hitInvulnerabilitySeconds = 0.35f;
 
+    [Tooltip("Sound played when damage is taken.")]
+    [SerializeField] private AudioClip takeDamageSound;
+
+    [Tooltip("Volume for the damage sound.")]
+    [Range(0f, 3f)]
+    [SerializeField] private float takeDamageSoundVolume = 2f;
+
+    [Tooltip("Optional AudioSource for damage SFX. If empty, one is created and configured as 2D.")]
+    [SerializeField] private AudioSource damageAudioSource;
+
     public int MaxHealth => maxHealth;
     public int CurrentHealth { get; private set; }
     public float HitInvulnerabilitySeconds => hitInvulnerabilitySeconds;
@@ -24,6 +34,14 @@ public class PlayerHealth : MonoBehaviour
     void Awake()
     {
         CurrentHealth = Mathf.Max(0, maxHealth);
+
+        if (damageAudioSource == null)
+            damageAudioSource = GetComponent<AudioSource>();
+        if (damageAudioSource == null)
+            damageAudioSource = gameObject.AddComponent<AudioSource>();
+
+        damageAudioSource.playOnAwake = false;
+        damageAudioSource.spatialBlend = 0f;
     }
 
     void Start()
@@ -43,6 +61,10 @@ public class PlayerHealth : MonoBehaviour
             return;
         CurrentHealth = Mathf.Max(0, CurrentHealth - amount);
         OnHealthChanged?.Invoke(CurrentHealth, maxHealth);
+
+        if (takeDamageSound != null && damageAudioSource != null)
+            damageAudioSource.PlayOneShot(takeDamageSound, takeDamageSoundVolume);
+
         if (CurrentHealth <= 0 && !_deathEventRaised)
         {
             _deathEventRaised = true;

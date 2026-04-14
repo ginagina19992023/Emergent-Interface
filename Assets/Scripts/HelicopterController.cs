@@ -86,8 +86,16 @@ public class HelicopterController : MonoBehaviour
     [Tooltip("Sound played when the weapon fires.")]
     [SerializeField] private AudioClip shootSound;
 
+    [Tooltip("Volume for the gun sound.")]
+    [Range(0f, 3f)]
+    [SerializeField] private float shootSoundVolume = 1.25f;
+
     [Tooltip("Sound played when a target is hit (but not destroyed).")]
     [SerializeField] private AudioClip hitMarkerSound;
+
+    [Tooltip("Volume for the hit marker sound.")]
+    [Range(0f, 3f)]
+    [SerializeField] private float hitMarkerSoundVolume = 1.25f;
 
     [Tooltip("Prefab with a LineRenderer for the bullet trail. Spawned per shot.")]
     [SerializeField] private LineRenderer bulletTrailPrefab;
@@ -367,7 +375,7 @@ public class HelicopterController : MonoBehaviour
 
         // Shoot SFX
         if (shootSound != null && shootAudioSource != null)
-            shootAudioSource.PlayOneShot(shootSound);
+            shootAudioSource.PlayOneShot(shootSound, shootSoundVolume);
 
         // Muzzle flash
         TriggerMuzzleFlash(origin);
@@ -386,7 +394,7 @@ public class HelicopterController : MonoBehaviour
 
                 // Hit marker SFX
                 if (hitMarkerSound != null && shootAudioSource != null)
-                    shootAudioSource.PlayOneShot(hitMarkerSound);
+                    shootAudioSource.PlayOneShot(hitMarkerSound, hitMarkerSoundVolume);
             }
 
             SpawnHitEffect(hit.point, hit.normal);

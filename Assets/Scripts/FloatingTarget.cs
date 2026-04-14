@@ -33,8 +33,19 @@ public class FloatingTarget : MonoBehaviour
   [Tooltip("Sound played when the target is hit but not destroyed.")]
   [SerializeField] private AudioClip hitSound;
 
+  [Tooltip("Volume for the hit sound.")]
+  [Range(0f, 3f)]
+  [SerializeField] private float hitSoundVolume = 1.5f;
+
   [Tooltip("Sound played when the target is destroyed.")]
   [SerializeField] private AudioClip destroySound;
+
+  [Tooltip("Volume for the destroy sound.")]
+  [Range(0f, 3f)]
+  [SerializeField] private float destroySoundVolume = 1.5f;
+
+  [Tooltip("Optional AudioSource for target SFX. If empty, one is created and configured as 2D.")]
+  [SerializeField] private AudioSource targetAudioSource;
 
   [Header("VFX")]
   [Tooltip("Particle system prefab spawned on destruction (explosion).")]
@@ -73,6 +84,16 @@ public class FloatingTarget : MonoBehaviour
   void Awake()
   {
     pathOrigin = transform.position;
+
+    if (targetAudioSource == null)
+      targetAudioSource = GetComponent<AudioSource>();
+    if (targetAudioSource == null)
+      targetAudioSource = GetComponentInChildren<AudioSource>();
+    if (targetAudioSource == null)
+      targetAudioSource = gameObject.AddComponent<AudioSource>();
+
+    targetAudioSource.playOnAwake = false;
+    targetAudioSource.spatialBlend = 0f;
   }
 
   void Start()
@@ -152,16 +173,16 @@ public class FloatingTarget : MonoBehaviour
 
       SpawnDebris();
 
-      if (destroySound != null)
-        AudioSource.PlayClipAtPoint(destroySound, transform.position);
+      if (destroySound != null && targetAudioSource != null)
+        targetAudioSource.PlayOneShot(destroySound, destroySoundVolume);
 
       OnDestroyed?.Invoke();
       Destroy(gameObject);
     }
     else
     {
-      if (hitSound != null)
-        AudioSource.PlayClipAtPoint(hitSound, transform.position);
+      if (hitSound != null && targetAudioSource != null)
+        targetAudioSource.PlayOneShot(hitSound, hitSoundVolume);
 
       TriggerFlash();
     }

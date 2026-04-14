@@ -8,6 +8,16 @@ public class PlayerScore : MonoBehaviour
 {
   public static PlayerScore Instance { get; private set; }
 
+  [Tooltip("Sound played whenever score is awarded.")]
+  [SerializeField] private AudioClip scoreSound;
+
+  [Tooltip("Volume for the score sound.")]
+  [Range(0f, 3f)]
+  [SerializeField] private float scoreSoundVolume = 2f;
+
+  [Tooltip("Optional AudioSource for score SFX. If empty, one is created and configured as 2D.")]
+  [SerializeField] private AudioSource scoreAudioSource;
+
   public int Score { get; private set; }
   public event Action<int> OnScoreChanged;
 
@@ -20,6 +30,14 @@ public class PlayerScore : MonoBehaviour
       return;
     }
     Instance = this;
+
+    if (scoreAudioSource == null)
+      scoreAudioSource = GetComponent<AudioSource>();
+    if (scoreAudioSource == null)
+      scoreAudioSource = gameObject.AddComponent<AudioSource>();
+
+    scoreAudioSource.playOnAwake = false;
+    scoreAudioSource.spatialBlend = 0f;
   }
 
   void OnDestroy()
@@ -34,5 +52,8 @@ public class PlayerScore : MonoBehaviour
       return;
     Score += amount;
     OnScoreChanged?.Invoke(Score);
+
+    if (scoreSound != null && scoreAudioSource != null)
+      scoreAudioSource.PlayOneShot(scoreSound, scoreSoundVolume);
   }
 }
