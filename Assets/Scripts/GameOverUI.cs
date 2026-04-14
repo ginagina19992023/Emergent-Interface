@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -30,6 +31,15 @@ public class GameOverUI : MonoBehaviour
     {
         if (playerHealth != null)
             playerHealth.OnPlayerDied -= HandlePlayerDied;
+    }
+
+    void Update()
+    {
+        if (overlayRoot == null || !overlayRoot.activeSelf)
+            return;
+
+        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+            Restart();
     }
 
     void HandlePlayerDied()

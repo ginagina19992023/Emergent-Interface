@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -15,6 +16,15 @@ public class LevelCompleteUI : MonoBehaviour
     {
         BuildOverlayIfNeeded();
         SetOverlayVisible(false);
+    }
+
+    void Update()
+    {
+        if (overlayRoot == null || !overlayRoot.activeSelf)
+            return;
+
+        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+            Restart();
     }
 
     public void Show()
