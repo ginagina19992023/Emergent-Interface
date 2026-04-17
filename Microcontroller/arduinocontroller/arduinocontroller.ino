@@ -14,7 +14,10 @@
 // --------------------
 // Encoder Variables
 // --------------------
+#define ENCODER_DEBOUNCE_US 3000  // tune up if double-steps, down if misses
+
 volatile long encoderPosition = 0;
+volatile unsigned long lastEncoderTime = 0;
 
 // --------------------
 // Bike Sensor Variables
@@ -44,8 +47,14 @@ int hitDetected = 0;
 // Encoder Interrupt
 // --------------------
 void handleEncoder() {
+  unsigned long now = micros();
+  if (now - lastEncoderTime < ENCODER_DEBOUNCE_US) return;
+  lastEncoderTime = now;
+
+  int a = digitalRead(ENCODER_A);
   int b = digitalRead(ENCODER_B);
-  if (b == HIGH) {
+
+  if (a != b) {
     encoderPosition++;
   } else {
     encoderPosition--;
