@@ -11,10 +11,10 @@ from adafruit_hid.keycode import Keycode
 # Pico W2 Pin Definitions (GPIO numbers)
 # --------------------
 # Rotary encoder: A and B channels
-ENCODER_A_PIN = board.GP2  # Encoder channel A
-ENCODER_B_PIN = board.GP3  # Encoder channel B
-BIKE_PIN = board.GP4  # Bike revolution sensor (digital, pullup)
-MIC_PIN = board.GP26  # Contact mic (analog, ADC0 on Pico W2)
+ENCODER_A_PIN = board.GP11  # Encoder channel A
+ENCODER_B_PIN = board.GP10  # Encoder channel B
+BIKE_PIN = board.GP5  # Bike revolution sensor (digital, pullup)
+MIC_PIN = board.GP27  # Contact mic (analog, ADC0 on Pico W2)
 
 # --------------------
 # Timing (matches arduinocontroller.ino: 100Hz update rate)
