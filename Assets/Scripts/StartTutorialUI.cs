@@ -134,7 +134,7 @@ public class StartTutorialUI : MonoBehaviour
         title.fontStyle = FontStyle.Bold;
         title.color = new Color(1f, 0.93f, 0.35f);
         title.alignment = TextAnchor.MiddleCenter;
-        title.text = "TUTORIAL";
+        title.text = "HOW TO PLAY";
 
         GameObject objectiveGo = new GameObject("Objective");
         objectiveGo.transform.SetParent(panelGo.transform, false);
