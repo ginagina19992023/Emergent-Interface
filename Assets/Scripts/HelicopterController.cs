@@ -19,6 +19,8 @@ public class HelicopterController : MonoBehaviour
     [SerializeField] private float respawnFadeToBlackSeconds = 0.3f;
     [Tooltip("Seconds to fade from black back to gameplay while showing countdown.")]
     [SerializeField] private float respawnCountdownSeconds = 3f;
+    [Tooltip("Seconds to keep a full black screen with crash message before countdown starts.")]
+    [SerializeField] private float respawnMessageHoldSeconds = 2f;
     [Tooltip("Color used for the respawn fullscreen fade.")]
     [SerializeField] private Color respawnFadeColor = Color.black;
 
@@ -211,11 +213,19 @@ public class HelicopterController : MonoBehaviour
 
         float fadeIn = Mathf.Max(0.01f, respawnFadeToBlackSeconds);
         float countdownDuration = Mathf.Max(0.01f, respawnCountdownSeconds);
+        float holdDuration = Mathf.Max(0f, respawnMessageHoldSeconds);
 
         yield return FadeOverlayAlpha(0f, 1f, fadeIn);
 
         TeleportToLastRespawnPoint();
         Time.timeScale = 0f;
+        respawnMessageText.text = "You crashed, respawning...";
+        respawnMessageText.enabled = true;
+        respawnCountdownText.text = string.Empty;
+        if (holdDuration > 0f)
+            yield return new WaitForSecondsRealtime(holdDuration);
+
+        respawnMessageText.enabled = false;
 
         float elapsed = 0f;
         while (elapsed < countdownDuration)
@@ -231,6 +241,7 @@ public class HelicopterController : MonoBehaviour
 
         SetOverlayAlpha(0f);
         respawnCountdownText.text = string.Empty;
+        respawnMessageText.enabled = true;
         respawnCanvas.gameObject.SetActive(false);
         Time.timeScale = 1f;
         isRespawning = false;
@@ -309,7 +320,7 @@ public class HelicopterController : MonoBehaviour
         respawnMessageText.fontStyle = FontStyle.Bold;
         respawnMessageText.color = new Color(1f, 1f, 1f, 0.95f);
         respawnMessageText.raycastTarget = false;
-        respawnMessageText.text = "You crashed, respawning";
+        respawnMessageText.text = "You crashed, respawning...";
         respawnMessageText.font = respawnCountdownText.font;
 
         canvasGo.SetActive(false);
