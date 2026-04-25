@@ -207,6 +207,11 @@ public class HelicopterController : MonoBehaviour
         }
     }
 
+    public Quaternion GetFlightAlignedRotation(Quaternion rawRotation)
+    {
+        return ConstrainRotationForFlight(rawRotation);
+    }
+
     Quaternion ConstrainRotationForFlight(Quaternion rawRotation)
     {
         Vector3 e = rawRotation.eulerAngles;
