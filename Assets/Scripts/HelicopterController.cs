@@ -9,6 +9,12 @@ using System.Collections;
 [RequireComponent(typeof(HelicopterInput))]
 public class HelicopterController : MonoBehaviour
 {
+    public Vector3 LastRespawnPointPosition { get; private set; }
+    public Quaternion LastRespawnPointRotation { get; private set; }
+    [Header("Respawn")]
+    [Tooltip("Player health source used to trigger teleport-to-checkpoint when damage is taken.")]
+    [SerializeField] private PlayerHealth playerHealth;
+
     [Header("Lift (press rate controls altitude)")]
     [Tooltip("Press rate (presses/sec) needed to hover. Below this = fall, above = rise.")]
     [SerializeField] private float hoverPressRate = 2f;
@@ -145,11 +151,19 @@ public class HelicopterController : MonoBehaviour
     private float noiseOffsetX;
     private float noiseOffsetY;
     private float noiseOffsetZ;
+    private bool hasHealthSnapshot;
+    private int previousHealth;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         input = GetComponent<HelicopterInput>();
+        LastRespawnPointPosition = transform.position;
+        LastRespawnPointRotation = transform.rotation;
+        if (playerHealth == null)
+            playerHealth = FindFirstObjectByType<PlayerHealth>();
+        if (playerHealth != null)
+            playerHealth.OnHealthChanged += HandleHealthChanged;
 
         rb.useGravity = true;
         rb.linearDamping = linearDrag;
@@ -158,6 +172,53 @@ public class HelicopterController : MonoBehaviour
         noiseOffsetX = Random.Range(0f, 100f);
         noiseOffsetY = Random.Range(0f, 100f);
         noiseOffsetZ = Random.Range(0f, 100f);
+    }
+
+    void OnDestroy()
+    {
+        if (playerHealth != null)
+            playerHealth.OnHealthChanged -= HandleHealthChanged;
+    }
+
+    public void SetInitialSpawnPoint(Vector3 spawnPosition, Quaternion spawnRotation)
+    {
+        LastRespawnPointPosition = spawnPosition;
+        LastRespawnPointRotation = spawnRotation;
+    }
+
+    public void SetLastRespawnPoint(Vector3 respawnPointCenter, Quaternion respawnRotation)
+    {
+        LastRespawnPointPosition = respawnPointCenter;
+        LastRespawnPointRotation = respawnRotation;
+    }
+
+    void HandleHealthChanged(int currentHealth, int maxHealth)
+    {
+        if (!hasHealthSnapshot)
+        {
+            previousHealth = currentHealth;
+            hasHealthSnapshot = true;
+            return;
+        }
+
+        if (currentHealth < previousHealth)
+            TeleportToLastRespawnPoint();
+
+        previousHealth = currentHealth;
+    }
+
+    public void TeleportToLastRespawnPoint()
+    {
+        transform.SetPositionAndRotation(LastRespawnPointPosition, LastRespawnPointRotation);
+        if (rb == null)
+            rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.position = LastRespawnPointPosition;
+            rb.rotation = LastRespawnPointRotation;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
     }
 
     void FixedUpdate()
