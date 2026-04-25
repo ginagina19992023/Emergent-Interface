@@ -154,7 +154,7 @@ public class StartTutorialUI : MonoBehaviour
             "Complete the course and aim for the highest score.\n\n" +
             "Your final score is based on:\n" +
             "- Points collected (from gates and targets)\n" +
-            "- Health left\n" +
+            "- Lives left\n" +
             "- Time left";
 
         GameObject targetsGo = new GameObject("Targets");
@@ -171,7 +171,7 @@ public class StartTutorialUI : MonoBehaviour
         targets.color = new Color(0.97f, 0.98f, 1f);
         targets.supportRichText = true;
         targets.alignment = TextAnchor.UpperLeft;
-        targets.text = "<b>Targets</b>\n- Yellow balls -> points";
+        targets.text = "<b>Crystals</b>\n- Crystals -> points";
 
         GameObject gatesGo = new GameObject("Gates");
         gatesGo.transform.SetParent(panelGo.transform, false);
@@ -206,7 +206,7 @@ public class StartTutorialUI : MonoBehaviour
         danger.color = new Color(1f, 0.78f, 0.78f);
         danger.supportRichText = true;
         danger.alignment = TextAnchor.UpperLeft;
-        danger.text = "<b>Damage</b>\n- You lose health if you bump into walls or the water";
+        danger.text = "<b>Damage</b>\n- You lose a life if you bump into walls or the water";
 
         GameObject controlsGo = new GameObject("Controls");
         controlsGo.transform.SetParent(panelGo.transform, false);

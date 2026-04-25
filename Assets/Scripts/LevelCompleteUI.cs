@@ -52,7 +52,7 @@ public class LevelCompleteUI : MonoBehaviour
         {
             detailsText.text =
                 $"Points: {pointsRounded}  <color={yellow}>+{pointsRounded}</color>\n" +
-                $"Health: {healthVal}  <color={yellow}>+{healthRounded}</color>\n" +
+                $"Lives: {healthVal}  <color={yellow}>+{healthRounded}</color>\n" +
                 $"Time: {timeSecRounded} s  <color={yellow}>+{timeContribRounded}</color>";
         }
 
@@ -129,7 +129,7 @@ public class LevelCompleteUI : MonoBehaviour
         detailsText.alignment = TextAnchor.MiddleCenter;
         detailsText.text =
             "Points: 0  <color=#FFEB3B>+0</color>\n" +
-            "Health: 0  <color=#FFEB3B>+0</color>\n" +
+            "Lives: 0  <color=#FFEB3B>+0</color>\n" +
             "Time: 0 s  <color=#FFEB3B>+0</color>";
 
         GameObject finalLabelGo = new GameObject("FinalScoreLabel");
