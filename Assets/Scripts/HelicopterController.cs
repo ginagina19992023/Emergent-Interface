@@ -167,13 +167,13 @@ public class HelicopterController : MonoBehaviour
     public void SetInitialSpawnPoint(Vector3 spawnPosition, Quaternion spawnRotation)
     {
         LastRespawnPointPosition = spawnPosition;
-        LastRespawnPointRotation = spawnRotation;
+        LastRespawnPointRotation = ConstrainRotationForFlight(spawnRotation);
     }
 
     public void SetLastRespawnPoint(Vector3 respawnPointCenter, Quaternion respawnRotation)
     {
         LastRespawnPointPosition = respawnPointCenter;
-        LastRespawnPointRotation = respawnRotation;
+        LastRespawnPointRotation = ConstrainRotationForFlight(respawnRotation);
     }
 
     void HandleHealthChanged(int currentHealth, int maxHealth)
@@ -193,16 +193,27 @@ public class HelicopterController : MonoBehaviour
 
     public void TeleportToLastRespawnPoint()
     {
-        transform.SetPositionAndRotation(LastRespawnPointPosition, LastRespawnPointRotation);
+        Quaternion respawnRotation = ConstrainRotationForFlight(LastRespawnPointRotation);
+        LastRespawnPointRotation = respawnRotation;
+        transform.SetPositionAndRotation(LastRespawnPointPosition, respawnRotation);
         if (rb == null)
             rb = GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.position = LastRespawnPointPosition;
-            rb.rotation = LastRespawnPointRotation;
+            rb.rotation = respawnRotation;
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
+    }
+
+    Quaternion ConstrainRotationForFlight(Quaternion rawRotation)
+    {
+        Vector3 e = rawRotation.eulerAngles;
+        e.x = lockedPitchAngle;
+        if (enforceUprightNoRoll)
+            e.z = 0f;
+        return Quaternion.Euler(e);
     }
 
     IEnumerator RespawnSequenceRoutine()
