@@ -45,6 +45,9 @@ public class HelicopterSpawnAtStart : MonoBehaviour
 
         Transform headingSource = headingOverride != null ? headingOverride : spawn.transform;
         Quaternion rotation = ResolveHeading(headingSource);
+        var helicopterController = GetComponent<HelicopterController>();
+        if (helicopterController != null)
+            rotation = helicopterController.GetFlightAlignedRotation(rotation);
 
         Vector3 position = spawn.transform.position;
         var rb = GetComponent<Rigidbody>();
@@ -58,7 +61,6 @@ public class HelicopterSpawnAtStart : MonoBehaviour
             rb.angularVelocity = Vector3.zero;
         }
 
-        var helicopterController = GetComponent<HelicopterController>();
         if (helicopterController != null)
             helicopterController.SetInitialSpawnPoint(position, rotation);
     }
