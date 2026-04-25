@@ -61,6 +61,83 @@ public static class ScoreboardStore
         return true;
     }
 
+    public static bool TryRenameEntry(string existingTeamName, string newTeamName, out string errorMessage)
+    {
+        string existingNormalized = NormalizeTeamName(existingTeamName);
+        string newNormalized = NormalizeTeamName(newTeamName);
+
+        if (string.IsNullOrEmpty(existingNormalized))
+        {
+            errorMessage = "Invalid existing team name.";
+            return false;
+        }
+
+        if (string.IsNullOrEmpty(newNormalized))
+        {
+            errorMessage = "Team name is required.";
+            return false;
+        }
+
+        var data = Load();
+        int entryIndex = -1;
+        for (int i = 0; i < data.entries.Count; i++)
+        {
+            if (NormalizeTeamName(data.entries[i].teamName) == existingNormalized)
+            {
+                entryIndex = i;
+                break;
+            }
+        }
+
+        if (entryIndex < 0)
+        {
+            errorMessage = "Team not found.";
+            return false;
+        }
+
+        for (int i = 0; i < data.entries.Count; i++)
+        {
+            if (i == entryIndex)
+                continue;
+
+            if (NormalizeTeamName(data.entries[i].teamName) == newNormalized)
+            {
+                errorMessage = "This team name is already taken.";
+                return false;
+            }
+        }
+
+        data.entries[entryIndex].teamName = newTeamName.Trim();
+        Save(data);
+        errorMessage = null;
+        return true;
+    }
+
+    public static bool TryDeleteEntry(string teamName, out string errorMessage)
+    {
+        string normalized = NormalizeTeamName(teamName);
+        if (string.IsNullOrEmpty(normalized))
+        {
+            errorMessage = "Invalid team name.";
+            return false;
+        }
+
+        var data = Load();
+        for (int i = 0; i < data.entries.Count; i++)
+        {
+            if (NormalizeTeamName(data.entries[i].teamName) != normalized)
+                continue;
+
+            data.entries.RemoveAt(i);
+            Save(data);
+            errorMessage = null;
+            return true;
+        }
+
+        errorMessage = "Team not found.";
+        return false;
+    }
+
     public static string NormalizeTeamName(string teamName)
     {
         if (string.IsNullOrWhiteSpace(teamName))

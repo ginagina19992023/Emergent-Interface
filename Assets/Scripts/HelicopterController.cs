@@ -379,6 +379,9 @@ public class HelicopterController : MonoBehaviour
 
     void Update()
     {
+        if (Time.timeScale <= 0f)
+            return;
+
         if (input.ShootPressed)
             Shoot();
     }
