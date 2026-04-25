@@ -9,7 +9,7 @@ public class HealthBarDisplay : MonoBehaviour
 {
   [SerializeField] private Text healthText;
   [SerializeField] private PlayerHealth playerHealth;
-  [SerializeField] private string prefix = "Health: ";
+  [SerializeField] private string prefix = "Lives: ";
   [SerializeField] private int fontSize = 28;
 
   void Awake()
