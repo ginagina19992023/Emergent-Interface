@@ -36,8 +36,8 @@ public class HelicopterController : MonoBehaviour
     [Tooltip("Constant forward speed applied to the helicopter.")]
     [SerializeField] private float forwardSpeed = 5f;
 
-    [Tooltip("Default downward pitch angle in degrees (helicopter nose points slightly down).")]
-    [SerializeField] private float defaultPitchAngle = 5f;
+    [Tooltip("Pitch angle in degrees that is always enforced (locks nose up/down).")]
+    [SerializeField] private float lockedPitchAngle = 5f;
 
     [Header("Shake")]
     [Tooltip("Enable movement shake for a more dynamic feel.")]
@@ -56,16 +56,6 @@ public class HelicopterController : MonoBehaviour
     [Tooltip("Degrees per second of yaw rotation.")]
     [SerializeField] private float yawSpeed = 120f;
 
-    [Tooltip("Degrees per second of pitch rotation.")]
-    [SerializeField] private float pitchSpeed = 80f;
-
-    [Tooltip("Maximum pitch angle in degrees.")]
-    [SerializeField] private float maxPitchAngle = 45f;
-
-    [Header("Stability")]
-    [Tooltip("How quickly the helicopter returns to default pitch when not pitching (0 = never).")]
-    [SerializeField] private float pitchStabilization = 1f;
-
     [Tooltip("Linear drag applied by the Rigidbody (set on Start).")]
     [SerializeField] private float linearDrag = 1f;
 
@@ -75,9 +65,6 @@ public class HelicopterController : MonoBehaviour
     [Header("Upright (collision stability)")]
     [Tooltip("Each physics step, force world roll (euler Z) to zero so bumps cannot bank the craft.")]
     [SerializeField] private bool enforceUprightNoRoll = true;
-
-    [Tooltip("When not pitching, damp pitch angular velocity from collisions (per second, higher = faster decay). 0 = off.")]
-    [SerializeField] private float idlePitchAngularVelocityDamping = 10f;
 
     [Header("Shooting (Hitscan)")]
     [Tooltip("Maximum range of the hitscan weapon.")]
@@ -342,11 +329,9 @@ public class HelicopterController : MonoBehaviour
         ApplyFall();
         ApplyForwardMovement();
         ApplyYaw();
-        ApplyPitch();
-        StabilizePitch();
         ApplyShake();
         EnforceUprightStability();
-        EnforceZeroWorldRoll();
+        EnforceLockedPitchAndZeroWorldRoll();
     }
 
     private void ApplyLift()
@@ -381,23 +366,6 @@ public class HelicopterController : MonoBehaviour
         float yawTorque = input.Yaw * yawSpeed * Time.fixedDeltaTime;
         Quaternion yawRotation = Quaternion.Euler(0f, yawTorque, 0f);
         rb.MoveRotation(rb.rotation * yawRotation);
-    }
-
-    private void ApplyPitch()
-    {
-        float pitchTorque = -input.Pitch * pitchSpeed * Time.fixedDeltaTime;
-
-        // Clamp pitch so the helicopter can't flip over
-        Quaternion desiredRotation = rb.rotation * Quaternion.Euler(pitchTorque, 0f, 0f);
-        Vector3 desiredEuler = desiredRotation.eulerAngles;
-
-        // Normalize pitch to -180..180 range for clamping
-        float normalizedPitch = desiredEuler.x;
-        if (normalizedPitch > 180f) normalizedPitch -= 360f;
-        normalizedPitch = Mathf.Clamp(normalizedPitch, -maxPitchAngle, maxPitchAngle);
-
-        desiredEuler.x = normalizedPitch;
-        rb.MoveRotation(Quaternion.Euler(desiredEuler));
     }
 
     private void ApplyForwardMovement()
@@ -437,21 +405,6 @@ public class HelicopterController : MonoBehaviour
         }
     }
 
-    private void StabilizePitch()
-    {
-        if (pitchStabilization <= 0f) return;
-        if (Mathf.Abs(input.Pitch) > 0.1f) return;
-
-        Vector3 euler = rb.rotation.eulerAngles;
-        float currentPitch = euler.x;
-        if (currentPitch > 180f) currentPitch -= 360f;
-
-        float pitchDiff = defaultPitchAngle - currentPitch;
-        float correction = pitchDiff * pitchStabilization * Time.fixedDeltaTime;
-        Quaternion pitchCorrection = Quaternion.Euler(correction, 0f, 0f);
-        rb.MoveRotation(rb.rotation * pitchCorrection);
-    }
-
     private void ApplyShake()
     {
         if (!enableShake) return;
@@ -475,20 +428,16 @@ public class HelicopterController : MonoBehaviour
     {
         Vector3 av = rb.angularVelocity;
         av.z = 0f;
-        if (idlePitchAngularVelocityDamping > 0f && Mathf.Abs(input.Pitch) < 0.1f)
-        {
-            float damp = Mathf.Exp(-idlePitchAngularVelocityDamping * Time.fixedDeltaTime);
-            av.x *= damp;
-        }
+        av.x = 0f;
         rb.angularVelocity = av;
     }
 
-    private void EnforceZeroWorldRoll()
+    private void EnforceLockedPitchAndZeroWorldRoll()
     {
-        if (!enforceUprightNoRoll)
-            return;
         Vector3 e = rb.rotation.eulerAngles;
-        e.z = 0f;
+        e.x = lockedPitchAngle;
+        if (enforceUprightNoRoll)
+            e.z = 0f;
         rb.MoveRotation(Quaternion.Euler(e));
     }
 
