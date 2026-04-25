@@ -57,6 +57,10 @@ public class HelicopterSpawnAtStart : MonoBehaviour
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
+
+        var helicopterController = GetComponent<HelicopterController>();
+        if (helicopterController != null)
+            helicopterController.SetInitialSpawnPoint(position, rotation);
     }
 
     Quaternion ResolveHeading(Transform source)
