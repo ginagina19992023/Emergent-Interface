@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// Reads input via the new Input System and exposes normalized helicopter control values.
 /// Attach to the same GameObject as HelicopterController.
 /// Uses the existing InputSystem_Actions asset:
-///   Move  (WASD / stick)  → Yaw (X) + Pitch (Y)
+///   Move  (WASD / stick)  → Yaw (X)
 ///   Jump  (Space)         → Press rate determines vertical momentum (fast = rise, medium = hover, slow = fall).
 ///   Attack (Left Mouse)   → Shoot
 /// Steering (A/D) uses velocity-based smoothing - rapid presses build up steering momentum.
@@ -15,7 +15,6 @@ using System.Collections.Generic;
 public class HelicopterInput : MonoBehaviour
 {
   public float Yaw { get; private set; }
-  public float Pitch { get; private set; }
   public bool ShootPressed { get; private set; }
 
   /// <summary>
@@ -62,7 +61,6 @@ public class HelicopterInput : MonoBehaviour
   void Update()
   {
     Vector2 move = moveAction.ReadValue<Vector2>();
-    Pitch = move.y;
 
     UpdateYawSteering(move.x);
 
