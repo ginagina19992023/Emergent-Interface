@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 /// <summary>
 /// Physics-based helicopter controller with shooting.
@@ -14,6 +15,12 @@ public class HelicopterController : MonoBehaviour
     [Header("Respawn")]
     [Tooltip("Player health source used to trigger teleport-to-checkpoint when damage is taken.")]
     [SerializeField] private PlayerHealth playerHealth;
+    [Tooltip("Seconds to fade from clear to full black before teleport.")]
+    [SerializeField] private float respawnFadeToBlackSeconds = 0.3f;
+    [Tooltip("Seconds to fade from black back to gameplay while showing countdown.")]
+    [SerializeField] private float respawnCountdownSeconds = 3f;
+    [Tooltip("Color used for the respawn fullscreen fade.")]
+    [SerializeField] private Color respawnFadeColor = Color.black;
 
     [Header("Lift (press rate controls altitude)")]
     [Tooltip("Press rate (presses/sec) needed to hover. Below this = fall, above = rise.")]
@@ -134,6 +141,11 @@ public class HelicopterController : MonoBehaviour
     private float noiseOffsetZ;
     private bool hasHealthSnapshot;
     private int previousHealth;
+    private bool isRespawning;
+    private Canvas respawnCanvas;
+    private Image respawnFadeImage;
+    private Text respawnCountdownText;
+    private Text respawnMessageText;
 
     void Start()
     {
@@ -159,6 +171,8 @@ public class HelicopterController : MonoBehaviour
     {
         if (playerHealth != null)
             playerHealth.OnHealthChanged -= HandleHealthChanged;
+        if (isRespawning)
+            Time.timeScale = 1f;
     }
 
     public void SetInitialSpawnPoint(Vector3 spawnPosition, Quaternion spawnRotation)
@@ -182,8 +196,8 @@ public class HelicopterController : MonoBehaviour
             return;
         }
 
-        if (currentHealth < previousHealth)
-            TeleportToLastRespawnPoint();
+        if (currentHealth < previousHealth && currentHealth > 0 && !isRespawning)
+            StartCoroutine(RespawnSequenceRoutine());
 
         previousHealth = currentHealth;
     }
@@ -200,6 +214,126 @@ public class HelicopterController : MonoBehaviour
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
+    }
+
+    IEnumerator RespawnSequenceRoutine()
+    {
+        isRespawning = true;
+        EnsureRespawnOverlayExists();
+        respawnCanvas.gameObject.SetActive(true);
+
+        float fadeIn = Mathf.Max(0.01f, respawnFadeToBlackSeconds);
+        float countdownDuration = Mathf.Max(0.01f, respawnCountdownSeconds);
+
+        yield return FadeOverlayAlpha(0f, 1f, fadeIn);
+
+        TeleportToLastRespawnPoint();
+        Time.timeScale = 0f;
+
+        float elapsed = 0f;
+        while (elapsed < countdownDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / countdownDuration);
+            SetOverlayAlpha(Mathf.Lerp(1f, 0f, t));
+
+            int secondsLeft = Mathf.Clamp(Mathf.CeilToInt(countdownDuration - elapsed), 1, Mathf.CeilToInt(countdownDuration));
+            respawnCountdownText.text = secondsLeft.ToString();
+            yield return null;
+        }
+
+        SetOverlayAlpha(0f);
+        respawnCountdownText.text = string.Empty;
+        respawnCanvas.gameObject.SetActive(false);
+        Time.timeScale = 1f;
+        isRespawning = false;
+    }
+
+    IEnumerator FadeOverlayAlpha(float from, float to, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            SetOverlayAlpha(Mathf.Lerp(from, to, t));
+            yield return null;
+        }
+        SetOverlayAlpha(to);
+    }
+
+    void SetOverlayAlpha(float alpha)
+    {
+        if (respawnFadeImage == null)
+            return;
+        Color c = respawnFadeColor;
+        c.a = alpha;
+        respawnFadeImage.color = c;
+    }
+
+    void EnsureRespawnOverlayExists()
+    {
+        if (respawnCanvas != null && respawnFadeImage != null && respawnCountdownText != null && respawnMessageText != null)
+            return;
+
+        GameObject canvasGo = new GameObject("RespawnTransitionUI");
+        respawnCanvas = canvasGo.AddComponent<Canvas>();
+        respawnCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        respawnCanvas.sortingOrder = 10000;
+        canvasGo.AddComponent<CanvasScaler>();
+        canvasGo.AddComponent<GraphicRaycaster>();
+
+        GameObject fadeGo = new GameObject("Fade");
+        fadeGo.transform.SetParent(canvasGo.transform, false);
+        RectTransform fadeRt = fadeGo.AddComponent<RectTransform>();
+        StretchFull(fadeRt);
+        respawnFadeImage = fadeGo.AddComponent<Image>();
+        respawnFadeImage.raycastTarget = false;
+
+        GameObject textGo = new GameObject("Countdown");
+        textGo.transform.SetParent(canvasGo.transform, false);
+        RectTransform textRt = textGo.AddComponent<RectTransform>();
+        textRt.anchorMin = new Vector2(0.5f, 0.5f);
+        textRt.anchorMax = new Vector2(0.5f, 0.5f);
+        textRt.pivot = new Vector2(0.5f, 0.5f);
+        textRt.sizeDelta = new Vector2(400f, 200f);
+        textRt.anchoredPosition = Vector2.zero;
+        respawnCountdownText = textGo.AddComponent<Text>();
+        respawnCountdownText.alignment = TextAnchor.MiddleCenter;
+        respawnCountdownText.fontSize = 96;
+        respawnCountdownText.fontStyle = FontStyle.Bold;
+        respawnCountdownText.color = new Color(1f, 1f, 1f, 0.95f);
+        respawnCountdownText.raycastTarget = false;
+        respawnCountdownText.font = Font.CreateDynamicFontFromOSFont(new[] { "Arial", "Segoe UI", "Helvetica" }, 96);
+        if (respawnCountdownText.font == null)
+            respawnCountdownText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+        GameObject messageGo = new GameObject("Message");
+        messageGo.transform.SetParent(canvasGo.transform, false);
+        RectTransform messageRt = messageGo.AddComponent<RectTransform>();
+        messageRt.anchorMin = new Vector2(0.5f, 0.5f);
+        messageRt.anchorMax = new Vector2(0.5f, 0.5f);
+        messageRt.pivot = new Vector2(0.5f, 0.5f);
+        messageRt.sizeDelta = new Vector2(900f, 80f);
+        messageRt.anchoredPosition = new Vector2(0f, 90f);
+        respawnMessageText = messageGo.AddComponent<Text>();
+        respawnMessageText.alignment = TextAnchor.MiddleCenter;
+        respawnMessageText.fontSize = 44;
+        respawnMessageText.fontStyle = FontStyle.Bold;
+        respawnMessageText.color = new Color(1f, 1f, 1f, 0.95f);
+        respawnMessageText.raycastTarget = false;
+        respawnMessageText.text = "You crashed, respawning";
+        respawnMessageText.font = respawnCountdownText.font;
+
+        canvasGo.SetActive(false);
+    }
+
+    static void StretchFull(RectTransform rt)
+    {
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
     }
 
     void FixedUpdate()
