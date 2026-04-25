@@ -290,23 +290,22 @@ public class LevelCompleteUI : MonoBehaviour
         boardPanelRt.pivot = new Vector2(0.5f, 0.5f);
         boardPanelRt.sizeDelta = new Vector2(360f, 450f);
         boardPanelRt.anchoredPosition = Vector2.zero;
-        boardPanelGo.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.06f);
 
         GameObject boardListGo = new GameObject("ScoreboardList");
         boardListGo.transform.SetParent(boardPanelGo.transform, false);
         scoreboardListRoot = boardListGo.AddComponent<RectTransform>();
-        scoreboardListRoot.anchorMin = new Vector2(0f, 0.33f);
+        scoreboardListRoot.anchorMin = new Vector2(0f, 1f);
         scoreboardListRoot.anchorMax = new Vector2(1f, 1f);
-        scoreboardListRoot.offsetMin = new Vector2(12f, -10f);
-        scoreboardListRoot.offsetMax = new Vector2(-12f, -8f);
+        scoreboardListRoot.pivot = new Vector2(0.5f, 1f);
+        scoreboardListRoot.anchoredPosition = new Vector2(0f, -8f);
+        scoreboardListRoot.sizeDelta = new Vector2(-24f, 260f);
         VerticalLayoutGroup layout = boardListGo.AddComponent<VerticalLayoutGroup>();
+        layout.childAlignment = TextAnchor.UpperLeft;
         layout.childControlHeight = true;
         layout.childControlWidth = true;
         layout.childForceExpandHeight = false;
         layout.childForceExpandWidth = true;
         layout.spacing = 6f;
-        ContentSizeFitter fitter = boardListGo.AddComponent<ContentSizeFitter>();
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         GameObject emptyTextGo = new GameObject("ScoreboardEmptyText");
         emptyTextGo.transform.SetParent(boardPanelGo.transform, false);
@@ -608,7 +607,7 @@ public class LevelCompleteUI : MonoBehaviour
             rowGo.transform.SetParent(scoreboardListRoot, false);
 
             LayoutElement rowLayout = rowGo.AddComponent<LayoutElement>();
-            rowLayout.preferredHeight = 38f;
+            rowLayout.preferredHeight = 44f;
 
             Image rowImage = rowGo.AddComponent<Image>();
             bool isSelected = i == selectedScoreboardIndex;
@@ -627,7 +626,7 @@ public class LevelCompleteUI : MonoBehaviour
             rowText.font = overlayFont;
             rowText.fontSize = 19;
             rowText.color = Color.white;
-            rowText.alignment = TextAnchor.MiddleLeft;
+            rowText.alignment = TextAnchor.UpperLeft;
             rowText.text = $"{i + 1}. {entry.teamName} - {entry.score:N0}";
         }
 
