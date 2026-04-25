@@ -18,10 +18,17 @@ public class GatePassBoost : MonoBehaviour
     [Tooltip("How long the sustained acceleration lasts (seconds).")]
     private float boostDuration = 2.5f;
 
+    [SerializeField]
+    [Tooltip("Optional target to hide when this gate is consumed. Defaults to this object.")]
+    private GameObject gateVisualToHide;
+
     private Transform _helicopterRootInside;
+    private bool _consumed;
 
     void OnTriggerEnter(Collider other)
     {
+        if (_consumed)
+            return;
         if (!TryGetHelicopterRoot(other, out Transform root))
             return;
         if (_helicopterRootInside == root)
@@ -31,6 +38,7 @@ public class GatePassBoost : MonoBehaviour
         var heli = root.GetComponent<HelicopterController>();
         if (heli != null)
             heli.ApplyDirectionalBoost(root.forward, velocityImpulse, extraForwardAcceleration, boostDuration);
+        ConsumeGate();
     }
 
     void OnTriggerExit(Collider other)
@@ -61,5 +69,14 @@ public class GatePassBoost : MonoBehaviour
         }
 
         return false;
+    }
+
+    void ConsumeGate()
+    {
+        _consumed = true;
+        _helicopterRootInside = null;
+
+        GameObject target = gateVisualToHide != null ? gateVisualToHide : gameObject;
+        target.SetActive(false);
     }
 }

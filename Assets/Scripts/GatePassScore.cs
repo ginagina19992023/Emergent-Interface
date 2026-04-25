@@ -10,10 +10,17 @@ public class GatePassScore : MonoBehaviour
     [Tooltip("Points added when the helicopter passes through the gate (each time it enters after having left).")]
     private int pointsOnPass = 250;
 
+    [SerializeField]
+    [Tooltip("Optional target to hide when this gate is consumed. Defaults to this object.")]
+    private GameObject gateVisualToHide;
+
     private Transform _helicopterRootInside;
+    private bool _consumed;
 
     void OnTriggerEnter(Collider other)
     {
+        if (_consumed)
+            return;
         if (pointsOnPass == 0 || PlayerScore.Instance == null)
             return;
         if (!TryGetHelicopterRoot(other, out Transform root))
@@ -23,6 +30,7 @@ public class GatePassScore : MonoBehaviour
 
         _helicopterRootInside = root;
         PlayerScore.Instance.AddScore(pointsOnPass);
+        ConsumeGate();
     }
 
     void OnTriggerExit(Collider other)
@@ -53,5 +61,14 @@ public class GatePassScore : MonoBehaviour
         }
 
         return false;
+    }
+
+    void ConsumeGate()
+    {
+        _consumed = true;
+        _helicopterRootInside = null;
+
+        GameObject target = gateVisualToHide != null ? gateVisualToHide : gameObject;
+        target.SetActive(false);
     }
 }
