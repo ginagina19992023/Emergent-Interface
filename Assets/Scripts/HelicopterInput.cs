@@ -39,6 +39,9 @@ public class HelicopterInput : MonoBehaviour
   [Tooltip("Maximum yaw velocity magnitude.")]
   [SerializeField] private float maxYawVelocity = 1f;
 
+  [Tooltip("Simulated steering press rate while holding A/D (presses per second).")]
+  [SerializeField] private float yawHoldRepeatRate = 50f;
+
   private InputAction moveAction;
   private InputAction jumpAction;
   private InputAction attackAction;
@@ -49,6 +52,8 @@ public class HelicopterInput : MonoBehaviour
   private float yawVelocity;
   private bool leftNeedsRelease;
   private bool rightNeedsRelease;
+  private float leftHoldAccumulatedTime;
+  private float rightHoldAccumulatedTime;
 
   void Awake()
   {
@@ -82,11 +87,18 @@ public class HelicopterInput : MonoBehaviour
   {
     bool leftPressed = rawYaw < -0.5f;
     bool rightPressed = rawYaw > 0.5f;
+    float holdStep = yawHoldRepeatRate > 0f ? 1f / yawHoldRepeatRate : float.PositiveInfinity;
 
     if (!leftPressed)
+    {
       leftNeedsRelease = false;
+      leftHoldAccumulatedTime = 0f;
+    }
     if (!rightPressed)
+    {
       rightNeedsRelease = false;
+      rightHoldAccumulatedTime = 0f;
+    }
 
     if (leftPressed && !leftNeedsRelease)
     {
@@ -98,6 +110,26 @@ public class HelicopterInput : MonoBehaviour
     {
       yawVelocity += yawAccelerationPerPress;
       rightNeedsRelease = true;
+    }
+
+    if (leftPressed && holdStep < float.PositiveInfinity)
+    {
+      leftHoldAccumulatedTime += Time.deltaTime;
+      while (leftHoldAccumulatedTime >= holdStep)
+      {
+        yawVelocity -= yawAccelerationPerPress;
+        leftHoldAccumulatedTime -= holdStep;
+      }
+    }
+
+    if (rightPressed && holdStep < float.PositiveInfinity)
+    {
+      rightHoldAccumulatedTime += Time.deltaTime;
+      while (rightHoldAccumulatedTime >= holdStep)
+      {
+        yawVelocity += yawAccelerationPerPress;
+        rightHoldAccumulatedTime -= holdStep;
+      }
     }
 
     yawVelocity = Mathf.Clamp(yawVelocity, -maxYawVelocity, maxYawVelocity);
