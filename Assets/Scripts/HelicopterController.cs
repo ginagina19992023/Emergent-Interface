@@ -135,6 +135,8 @@ public class HelicopterController : MonoBehaviour
     private Image respawnFadeImage;
     private Text respawnCountdownText;
     private Text respawnMessageText;
+    private bool defaultUseGravity = true;
+    private bool verticalMotionLocked;
 
     void Start()
     {
@@ -148,6 +150,7 @@ public class HelicopterController : MonoBehaviour
             playerHealth.OnHealthChanged += HandleHealthChanged;
 
         rb.useGravity = true;
+        defaultUseGravity = rb.useGravity;
         rb.linearDamping = linearDrag;
         rb.angularDamping = angularDrag;
 
@@ -210,6 +213,24 @@ public class HelicopterController : MonoBehaviour
     public Quaternion GetFlightAlignedRotation(Quaternion rawRotation)
     {
         return ConstrainRotationForFlight(rawRotation);
+    }
+
+    public void SetVerticalMotionLocked(bool locked)
+    {
+        verticalMotionLocked = locked;
+        if (rb == null)
+            rb = GetComponent<Rigidbody>();
+        if (rb == null)
+            return;
+
+        rb.useGravity = locked ? false : defaultUseGravity;
+        if (locked)
+        {
+            Vector3 v = rb.linearVelocity;
+            if (v.y > 0f)
+                v.y = 0f;
+            rb.linearVelocity = v;
+        }
     }
 
     Quaternion ConstrainRotationForFlight(Quaternion rawRotation)
@@ -352,13 +373,23 @@ public class HelicopterController : MonoBehaviour
 
     void FixedUpdate()
     {
-        ApplyLift();
-        ApplyFall();
+        if (!verticalMotionLocked)
+        {
+            ApplyLift();
+            ApplyFall();
+        }
         ApplyForwardMovement();
         ApplyYaw();
         ApplyShake();
         EnforceUprightStability();
         EnforceLockedPitchAndZeroWorldRoll();
+        if (verticalMotionLocked)
+        {
+            Vector3 v = rb.linearVelocity;
+            if (v.y > 0f)
+                v.y = 0f;
+            rb.linearVelocity = v;
+        }
     }
 
     private void ApplyLift()
