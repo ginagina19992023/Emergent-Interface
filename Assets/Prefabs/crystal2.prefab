@@ -99,8 +99,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6601083879372959371}
-  - component: {fileID: 7076070590153639269}
-  - component: {fileID: 5664730287761569136}
+  - component: {fileID: 7403269660012568648}
+  - component: {fileID: 2889054988093274506}
   m_Layer: 0
   m_Name: crystal2
   m_TagString: Untagged
@@ -124,36 +124,7 @@ Transform:
   - {fileID: 6047198378487979987}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7076070590153639269
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5823174645870064689}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bb7642960c40264fb73a6cd1e4a1f16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FloatingTarget
-  stationary: 1
-  pointA: {x: 0, y: 0, z: 0}
-  pointB: {x: 0, y: 0, z: 0}
-  moveSpeed: 2
-  health: 5
-  pointsOnDestroy: 100
-  hitSound: {fileID: 0}
-  hitSoundVolume: 1.5
-  destroySound: {fileID: 0}
-  destroySoundVolume: 1.5
-  targetAudioSource: {fileID: 0}
-  explosionPrefab: {fileID: 0}
-  flashColor: {r: 0.32941177, g: 0, b: 0.16470589, a: 1}
-  flashDuration: 0.1
-  debrisCount: 8
-  debrisForce: 15
-  debrisLifetime: 3
---- !u!136 &5664730287761569136
+--- !u!136 &7403269660012568648
 CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -176,3 +147,32 @@ CapsuleCollider:
   m_Height: 35
   m_Direction: 1
   m_Center: {x: 25, y: 15, z: 0}
+--- !u!114 &2889054988093274506
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5823174645870064689}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bb7642960c40264fb73a6cd1e4a1f16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FloatingTarget
+  stationary: 1
+  pointA: {x: 0, y: 0, z: 0}
+  pointB: {x: 0, y: 0, z: 0}
+  moveSpeed: 2
+  health: 5
+  pointsOnDestroy: 100
+  hitSound: {fileID: 8300000, guid: fea40f99c5cffc646a434feee039794c, type: 3}
+  hitSoundVolume: 1.5
+  destroySound: {fileID: 8300000, guid: 055854a636d459340971bb395d172054, type: 3}
+  destroySoundVolume: 1.5
+  targetAudioSource: {fileID: 0}
+  explosionPrefab: {fileID: 0}
+  flashColor: {r: 0.32941177, g: 0, b: 0.16470589, a: 1}
+  flashDuration: 0.1
+  debrisCount: 0
+  debrisForce: 15
+  debrisLifetime: 3

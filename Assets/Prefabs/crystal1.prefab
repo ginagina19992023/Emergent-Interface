@@ -52,15 +52,15 @@ MonoBehaviour:
   moveSpeed: 2
   health: 5
   pointsOnDestroy: 100
-  hitSound: {fileID: 0}
+  hitSound: {fileID: 8300000, guid: fea40f99c5cffc646a434feee039794c, type: 3}
   hitSoundVolume: 1.5
-  destroySound: {fileID: 0}
+  destroySound: {fileID: 8300000, guid: 055854a636d459340971bb395d172054, type: 3}
   destroySoundVolume: 1.5
   targetAudioSource: {fileID: 0}
   explosionPrefab: {fileID: 0}
   flashColor: {r: 0.3301887, g: 0, b: 0.16509435, a: 1}
   flashDuration: 0.1
-  debrisCount: 8
+  debrisCount: 0
   debrisForce: 15
   debrisLifetime: 3
 --- !u!136 &1131370854008749312

@@ -84,6 +84,7 @@ public class FloatingTarget : MonoBehaviour
   void Awake()
   {
     pathOrigin = transform.position;
+    bool hasAssignedAudioSource = targetAudioSource != null;
 
     if (targetAudioSource == null)
       targetAudioSource = GetComponent<AudioSource>();
@@ -92,8 +93,13 @@ public class FloatingTarget : MonoBehaviour
     if (targetAudioSource == null)
       targetAudioSource = gameObject.AddComponent<AudioSource>();
 
-    targetAudioSource.playOnAwake = false;
-    targetAudioSource.spatialBlend = 0f;
+    // Only auto-configure when we discover/create a local source. If a shared scene source
+    // was assigned in the inspector, preserve its existing mixer/spatial settings.
+    if (!hasAssignedAudioSource && targetAudioSource != null)
+    {
+      targetAudioSource.playOnAwake = false;
+      targetAudioSource.spatialBlend = 0f;
+    }
   }
 
   void Start()
@@ -173,8 +179,15 @@ public class FloatingTarget : MonoBehaviour
 
       SpawnDebris();
 
-      if (destroySound != null && targetAudioSource != null)
-        targetAudioSource.PlayOneShot(destroySound, destroySoundVolume);
+      if (destroySound != null)
+      {
+        // If the source lives on this target, PlayOneShot would be cut off by Destroy(gameObject).
+        // Use a short-lived detached source instead so the clip can finish.
+        if (targetAudioSource != null && targetAudioSource.gameObject != gameObject)
+          targetAudioSource.PlayOneShot(destroySound, destroySoundVolume);
+        else
+          PlayDestroySoundDetached();
+      }
 
       OnDestroyed?.Invoke();
       Destroy(gameObject);
@@ -249,5 +262,25 @@ public class FloatingTarget : MonoBehaviour
 
       Destroy(debris, debrisLifetime);
     }
+  }
+
+  private void PlayDestroySoundDetached()
+  {
+    if (destroySound == null)
+      return;
+
+    GameObject destroySfxObject = new GameObject("FloatingTarget_DestroySFX");
+    destroySfxObject.transform.position = transform.position;
+
+    AudioSource detachedSource = destroySfxObject.AddComponent<AudioSource>();
+    detachedSource.playOnAwake = false;
+    detachedSource.clip = destroySound;
+    detachedSource.volume = destroySoundVolume;
+    detachedSource.spatialBlend = targetAudioSource != null ? targetAudioSource.spatialBlend : 0f;
+    if (targetAudioSource != null)
+      detachedSource.outputAudioMixerGroup = targetAudioSource.outputAudioMixerGroup;
+
+    detachedSource.Play();
+    Destroy(destroySfxObject, destroySound.length + 0.1f);
   }
 }
