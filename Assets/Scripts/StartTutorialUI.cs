@@ -153,7 +153,7 @@ public class StartTutorialUI : MonoBehaviour
         objective.text =
             "Complete the course and aim for the highest score.\n\n" +
             "Your final score is based on:\n" +
-            "- Points collected (from gates and targets)\n" +
+            "- Score from crystals and gates\n" +
             "- Lives left\n" +
             "- Time left";
 
@@ -171,7 +171,7 @@ public class StartTutorialUI : MonoBehaviour
         targets.color = new Color(0.97f, 0.98f, 1f);
         targets.supportRichText = true;
         targets.alignment = TextAnchor.UpperLeft;
-        targets.text = "<b>Crystals</b>\n- Crystals -> points";
+        targets.text = "<b>Crystals</b>\n- Destroy them by shooting";
 
         GameObject gatesGo = new GameObject("Gates");
         gatesGo.transform.SetParent(panelGo.transform, false);
@@ -189,8 +189,8 @@ public class StartTutorialUI : MonoBehaviour
         gates.alignment = TextAnchor.UpperLeft;
         gates.text =
             "<b>Gates</b>\n" +
-            "- Yellow gates -> points\n" +
-            "- Blue gates -> points + boost";
+            "- Go trough them to get points\n" +
+            "- Blue gates give you a speed boost";
 
         GameObject dangerGo = new GameObject("Damage");
         dangerGo.transform.SetParent(panelGo.transform, false);
@@ -206,7 +206,7 @@ public class StartTutorialUI : MonoBehaviour
         danger.color = new Color(1f, 0.78f, 0.78f);
         danger.supportRichText = true;
         danger.alignment = TextAnchor.UpperLeft;
-        danger.text = "<b>Damage</b>\n- You lose a life if you bump into walls or the water";
+        danger.text = "<b>Damage</b>\n- You lose a life if you bump into objects";
 
         GameObject controlsGo = new GameObject("Controls");
         controlsGo.transform.SetParent(panelGo.transform, false);

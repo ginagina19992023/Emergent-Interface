@@ -14,7 +14,10 @@ public class TimerDisplay : MonoBehaviour
 
   void Awake()
   {
-    EnsureTimerText();
+    if (timerText != null)
+      timerText.gameObject.SetActive(false);
+
+    // EnsureTimerText();
   }
 
   void Start()
@@ -27,7 +30,7 @@ public class TimerDisplay : MonoBehaviour
   {
     if (gameTimer == null)
       return;
-    Refresh(gameTimer.ElapsedSeconds);
+    // Refresh(gameTimer.ElapsedSeconds);
   }
 
   private void EnsureTimerText()
