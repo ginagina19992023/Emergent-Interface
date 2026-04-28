@@ -523,15 +523,25 @@ public class HelicopterController : MonoBehaviour
 
         if (didHit)
         {
+            bool damagedTarget = false;
+
             FloatingTarget target = hit.collider.GetComponentInParent<FloatingTarget>();
             if (target != null)
             {
                 target.TakeHit(damage);
-
-                // Hit marker SFX
-                if (hitMarkerSound != null && shootAudioSource != null)
-                    shootAudioSource.PlayOneShot(hitMarkerSound, hitMarkerSoundVolume);
+                damagedTarget = true;
             }
+
+            Wizard wizard = hit.collider.GetComponentInParent<Wizard>();
+            if (wizard != null)
+            {
+                wizard.TakeHit(damage);
+                damagedTarget = true;
+            }
+
+            // Hit marker SFX
+            if (damagedTarget && hitMarkerSound != null && shootAudioSource != null)
+                shootAudioSource.PlayOneShot(hitMarkerSound, hitMarkerSoundVolume);
 
             SpawnHitEffect(hit.point, hit.normal);
         }

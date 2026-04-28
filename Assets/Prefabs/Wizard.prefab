@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4889918437798443897}
   - component: {fileID: 5849305437565022597}
+  - component: {fileID: 8446605216355336550}
   m_Layer: 0
   m_Name: Wizard
   m_TagString: Untagged
@@ -50,6 +51,36 @@ MonoBehaviour:
   spawnIntervalSeconds: 10
   spawnPoint: {fileID: 2939403899128211253}
   helicopterTransform: {fileID: 0}
+  health: 15
+  pointsOnDeath: 500
+  hitSound: {fileID: 8300000, guid: 4ff668ba4281cc04b9905a3521102aa6, type: 3}
+  hitSoundVolume: 1
+  deathSound: {fileID: 8300000, guid: 3f25a83d8cda5674298f467331f3dd71, type: 3}
+  deathSoundVolume: 1.5
+  wizardAudioSource: {fileID: 0}
+--- !u!136 &8446605216355336550
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3244462219867090997}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 2
+  m_Height: 6
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5458017889428167322
 GameObject:
   m_ObjectHideFlags: 0
