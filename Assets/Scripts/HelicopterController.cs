@@ -535,7 +535,7 @@ public class HelicopterController : MonoBehaviour
             Wizard wizard = hit.collider.GetComponentInParent<Wizard>();
             if (wizard != null)
             {
-                wizard.TakeHit(damage);
+                wizard.TakeHit(damage, hit.point, hit.normal);
                 damagedTarget = true;
             }
 

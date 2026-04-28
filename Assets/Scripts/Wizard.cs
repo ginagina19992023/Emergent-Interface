@@ -42,6 +42,31 @@ public class Wizard : MonoBehaviour
     [Tooltip("Optional AudioSource for wizard SFX. If empty, one is created and configured as 2D.")]
     [SerializeField] private AudioSource wizardAudioSource;
 
+    [Header("Blood VFX")]
+    [Tooltip("Optional one-shot effect spawned at the bullet impact (e.g. Particle System prefab). If empty, procedural blood spheres are used.")]
+    [SerializeField] private GameObject bloodBurstPrefab;
+
+    [Tooltip("Number of blood spheres on a non-lethal hit (ignored if Blood Burst Prefab is assigned).")]
+    [SerializeField] private int bloodDropletsPerHit = 12;
+
+    [Tooltip("Extra blood spheres when this hit kills the wizard.")]
+    [SerializeField] private int bloodDropletsOnKill = 10;
+
+    [Tooltip("Minimum sphere scale for procedural blood.")]
+    [SerializeField] private float bloodSphereScaleMin = 0.04f;
+
+    [Tooltip("Maximum sphere scale for procedural blood.")]
+    [SerializeField] private float bloodSphereScaleMax = 0.11f;
+
+    [Tooltip("Impulse strength for procedural blood spheres.")]
+    [SerializeField] private float bloodBurstForce = 9f;
+
+    [Tooltip("Seconds before procedural blood spheres are destroyed.")]
+    [SerializeField] private float bloodLifetime = 1.4f;
+
+    [Tooltip("Color of procedural blood spheres.")]
+    [SerializeField] private Color bloodColor = new Color(0.5f, 0.02f, 0.04f, 1f);
+
     private float spawnTimer;
     private bool warnedMissingPrefab;
     private bool isDead;
@@ -110,8 +135,17 @@ public class Wizard : MonoBehaviour
 
     public void TakeHit(float damageAmount)
     {
+        Vector3 fallbackImpact = transform.position + Vector3.up * 0.5f;
+        TakeHit(damageAmount, fallbackImpact, Vector3.up);
+    }
+
+    public void TakeHit(float damageAmount, Vector3 impactWorldPosition, Vector3 impactWorldNormal)
+    {
         if (isDead || damageAmount <= 0f)
             return;
+
+        bool willKill = health - damageAmount <= 0f;
+        SpawnBloodAtImpact(impactWorldPosition, impactWorldNormal, willKill);
 
         health -= damageAmount;
         if (health > 0f)
@@ -130,6 +164,46 @@ public class Wizard : MonoBehaviour
             PlayDeathSound();
 
         Destroy(gameObject);
+    }
+
+    private void SpawnBloodAtImpact(Vector3 position, Vector3 normal, bool lethalHit)
+    {
+        if (bloodBurstPrefab != null)
+        {
+            Quaternion rot = normal.sqrMagnitude > 0.0001f
+                ? Quaternion.LookRotation(normal.normalized)
+                : Quaternion.identity;
+            GameObject fx = Instantiate(bloodBurstPrefab, position, rot);
+            Destroy(fx, 4f);
+            return;
+        }
+
+        Vector3 outward = normal.sqrMagnitude > 0.0001f ? normal.normalized : Vector3.up;
+        int count = bloodDropletsPerHit + (lethalHit ? bloodDropletsOnKill : 0);
+        count = Mathf.Max(0, count);
+
+        float scaleMin = Mathf.Min(bloodSphereScaleMin, bloodSphereScaleMax);
+        float scaleMax = Mathf.Max(bloodSphereScaleMin, bloodSphereScaleMax);
+
+        for (int i = 0; i < count; i++)
+        {
+            GameObject drop = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            drop.name = "WizardBlood";
+            drop.transform.position = position + Random.insideUnitSphere * 0.06f;
+            drop.transform.localScale = Vector3.one * Random.Range(scaleMin, scaleMax);
+
+            Renderer rend = drop.GetComponent<Renderer>();
+            rend.material.color = bloodColor;
+
+            Rigidbody rb = drop.AddComponent<Rigidbody>();
+            rb.mass = 0.02f;
+            rb.linearDamping = 0.5f;
+            Vector3 dir = (outward * 1.2f + Random.insideUnitSphere).normalized;
+            rb.AddForce(dir * Random.Range(bloodBurstForce * 0.45f, bloodBurstForce), ForceMode.Impulse);
+            rb.AddTorque(Random.insideUnitSphere * 8f, ForceMode.Impulse);
+
+            Destroy(drop, bloodLifetime);
+        }
     }
 
     private void PlayDeathSound()
