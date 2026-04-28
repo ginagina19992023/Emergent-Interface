@@ -1,20 +1,18 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
-/// Shows <see cref="PlayerScore"/> on a UI <see cref="Text"/>. Assign an existing Text or leave empty to create one at runtime.
+/// Shows <see cref="PlayerScore"/> on a UI score label.
 /// </summary>
 [RequireComponent(typeof(Canvas))]
 public class ScoreDisplay : MonoBehaviour
 {
-  [SerializeField] private Text scoreText;
+  [SerializeField] private TMP_Text scoreText;
   [SerializeField] private PlayerScore playerScore;
-  [SerializeField] private string prefix = "Points: ";
-  [SerializeField] private int fontSize = 28;
 
   void Awake()
   {
-    EnsureScoreText();
+    ResolveScoreText();
   }
 
   void Start()
@@ -37,34 +35,29 @@ public class ScoreDisplay : MonoBehaviour
       playerScore.OnScoreChanged -= Refresh;
   }
 
-  private void EnsureScoreText()
+  private void ResolveScoreText()
   {
     if (scoreText != null)
       return;
 
-    GameObject textGo = new GameObject("ScoreText");
-    textGo.transform.SetParent(transform, false);
-    RectTransform rt = textGo.AddComponent<RectTransform>();
-    rt.anchorMin = new Vector2(0f, 1f);
-    rt.anchorMax = new Vector2(0f, 1f);
-    rt.pivot = new Vector2(0f, 1f);
-    rt.anchoredPosition = new Vector2(24f, -24f);
-    rt.sizeDelta = new Vector2(480f, 56f);
+    Transform scoreCounter = transform.Find("ScoreCounter");
+    if (scoreCounter == null)
+    {
+      GameObject scoreCounterObject = GameObject.Find("ScoreCounter");
+      if (scoreCounterObject != null)
+        scoreCounter = scoreCounterObject.transform;
+    }
 
-    scoreText = textGo.AddComponent<Text>();
-    Font font = Font.CreateDynamicFontFromOSFont(new[] { "Arial", "Segoe UI", "Helvetica" }, fontSize);
-    if (font == null)
-      font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-    scoreText.font = font;
-    scoreText.fontSize = fontSize;
-    scoreText.color = Color.white;
-    scoreText.alignment = TextAnchor.UpperLeft;
-    scoreText.text = prefix + "0";
+    if (scoreCounter != null)
+      scoreText = scoreCounter.GetComponent<TMP_Text>();
+
+    if (scoreText == null)
+      Debug.LogWarning("ScoreDisplay: Could not find TMP_Text on 'ScoreCounter'.");
   }
 
   private void Refresh(int score)
   {
     if (scoreText != null)
-      scoreText.text = prefix + score.ToString();
+      scoreText.text = score.ToString();
   }
 }

@@ -76,7 +76,7 @@ public class LevelCompleteUI : MonoBehaviour
         if (detailsText != null)
         {
             detailsText.text =
-                $"Points: {pointsRounded}  <color={yellow}>+{pointsRounded}</color>\n" +
+                $"Score: {pointsRounded}  <color={yellow}>+{pointsRounded}</color>\n" +
                 $"Lives: {healthVal}  <color={yellow}>+{healthRounded}</color>\n" +
                 $"Time: {timeSecRounded} s  <color={yellow}>+{timeContribRounded}</color>";
         }
