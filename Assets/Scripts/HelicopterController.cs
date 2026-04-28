@@ -99,11 +99,11 @@ public class HelicopterController : MonoBehaviour
     [Range(0f, 3f)]
     [SerializeField] private float hitMarkerSoundVolume = 1.25f;
 
-    [Tooltip("Prefab with a LineRenderer for the bullet trail. Spawned per shot.")]
-    [SerializeField] private LineRenderer bulletTrailPrefab;
+    [Tooltip("UI image shown briefly whenever the weapon fires.")]
+    [SerializeField] private Image shootExplosionImage;
 
-    [Tooltip("How long the bullet trail is visible (seconds).")]
-    [SerializeField] private float trailDuration = 0.08f;
+    [Tooltip("How long the ShootExplosion image stays visible per shot (seconds).")]
+    [SerializeField] private float shootExplosionDuration = 0.08f;
 
     [Header("Muzzle Flash")]
     [Tooltip("Particle system for muzzle flash effect (optional).")]
@@ -137,6 +137,7 @@ public class HelicopterController : MonoBehaviour
     private Text respawnMessageText;
     private bool defaultUseGravity = true;
     private bool verticalMotionLocked;
+    private Coroutine shootExplosionRoutine;
 
     void Start()
     {
@@ -157,6 +158,9 @@ public class HelicopterController : MonoBehaviour
         noiseOffsetX = Random.Range(0f, 100f);
         noiseOffsetY = Random.Range(0f, 100f);
         noiseOffsetZ = Random.Range(0f, 100f);
+
+        if (shootExplosionImage != null)
+            shootExplosionImage.enabled = false;
     }
 
     void OnDestroy()
@@ -513,14 +517,12 @@ public class HelicopterController : MonoBehaviour
 
         // Muzzle flash
         TriggerMuzzleFlash(origin);
+        TriggerShootExplosionFlash();
 
-        Vector3 endPoint = origin + direction * maxRange;
         bool didHit = Physics.Raycast(origin, direction, out RaycastHit hit, maxRange, hitLayers);
 
         if (didHit)
         {
-            endPoint = hit.point;
-
             FloatingTarget target = hit.collider.GetComponentInParent<FloatingTarget>();
             if (target != null)
             {
@@ -533,10 +535,6 @@ public class HelicopterController : MonoBehaviour
 
             SpawnHitEffect(hit.point, hit.normal);
         }
-
-        // Bullet trail
-        if (bulletTrailPrefab != null)
-            SpawnTrail(origin, endPoint);
     }
 
     private void TriggerMuzzleFlash(Vector3 position)
@@ -585,12 +583,21 @@ public class HelicopterController : MonoBehaviour
         Destroy(hitObj, 0.05f);
     }
 
-    private void SpawnTrail(Vector3 start, Vector3 end)
+    private void TriggerShootExplosionFlash()
     {
-        LineRenderer trail = Instantiate(bulletTrailPrefab);
-        trail.positionCount = 2;
-        trail.SetPosition(0, start);
-        trail.SetPosition(1, end);
-        Destroy(trail.gameObject, trailDuration);
+        if (shootExplosionImage == null)
+            return;
+
+        if (shootExplosionRoutine != null)
+            StopCoroutine(shootExplosionRoutine);
+        shootExplosionRoutine = StartCoroutine(ShootExplosionFlashRoutine());
+    }
+
+    private IEnumerator ShootExplosionFlashRoutine()
+    {
+        shootExplosionImage.enabled = true;
+        yield return new WaitForSeconds(Mathf.Max(0f, shootExplosionDuration));
+        shootExplosionImage.enabled = false;
+        shootExplosionRoutine = null;
     }
 }
