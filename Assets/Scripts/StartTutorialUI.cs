@@ -206,7 +206,7 @@ public class StartTutorialUI : MonoBehaviour
         danger.color = new Color(1f, 0.78f, 0.78f);
         danger.supportRichText = true;
         danger.alignment = TextAnchor.UpperLeft;
-        danger.text = "<b>Damage</b>\n- You lose a life if you bump into objects";
+        danger.text = "<b>Damage</b>\n- You lose a life if you bump into objects\n - Also watch out for the wizards' attacks!";
 
         GameObject controlsGo = new GameObject("Controls");
         controlsGo.transform.SetParent(panelGo.transform, false);
