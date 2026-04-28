@@ -9,6 +9,13 @@ using UnityEngine.UI;
 /// </summary>
 public class LevelCompleteUI : MonoBehaviour
 {
+    [Header("Time Bonus Tuning")]
+    [SerializeField] float targetTimeSec = 200f;
+    [SerializeField] float maxTimeBonus = 9000f;
+    [SerializeField] float minTimeBonus = 0f;
+    [Header("Health Bonus Tuning")]
+    [SerializeField] float healthScoreMultiplier = 200f;
+
     GameObject overlayRoot;
     Font overlayFont;
     Text detailsText;
@@ -58,10 +65,9 @@ public class LevelCompleteUI : MonoBehaviour
         var timer = FindFirstObjectByType<GameTimer>();
         float timeSec = timer != null ? timer.ElapsedSeconds : 0f;
 
-        float safeTime = Mathf.Max(timeSec, 0.0001f);
         float fromPoints = points;
-        float fromHealth = healthVal * 100f;
-        float fromTime = (1f / safeTime) * 100000f;
+        float fromHealth = healthVal * healthScoreMultiplier;
+        float fromTime = ComputeTimeBonus(timeSec);
         float finalScore = fromPoints + fromHealth + fromTime;
 
         int pointsRounded = Mathf.RoundToInt(fromPoints);
@@ -89,6 +95,14 @@ public class LevelCompleteUI : MonoBehaviour
         RefreshScoreboardList();
         SetOverlayVisible(true);
         Time.timeScale = 0f;
+    }
+
+    float ComputeTimeBonus(float timeSec)
+    {
+        float safeTargetTime = Mathf.Max(0.0001f, targetTimeSec);
+        float clampedTime = Mathf.Max(0f, timeSec);
+        float normalized = Mathf.Clamp01(1f - (clampedTime / safeTargetTime));
+        return Mathf.Lerp(minTimeBonus, maxTimeBonus, normalized);
     }
 
     void Restart()
