@@ -1,20 +1,25 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
-/// Shows <see cref="PlayerHealth"/> on a UI <see cref="Text"/>, matching <see cref="ScoreDisplay"/> layout. Assign an existing Text or leave empty to create one at runtime.
+/// Shows lives by toggling one of six state objects (0Lives..5Lives) based on <see cref="PlayerHealth"/>.
 /// </summary>
 [RequireComponent(typeof(Canvas))]
 public class HealthBarDisplay : MonoBehaviour
 {
-  [SerializeField] private Text healthText;
   [SerializeField] private PlayerHealth playerHealth;
-  [SerializeField] private string prefix = "Lives: ";
-  [SerializeField] private int fontSize = 28;
+  [SerializeField] private GameObject zeroLives;
+  [SerializeField] private GameObject oneLives;
+  [SerializeField] private GameObject twoLives;
+  [SerializeField] private GameObject threeLives;
+  [SerializeField] private GameObject fourLives;
+  [SerializeField] private GameObject fiveLives;
+
+  private readonly GameObject[] liveStates = new GameObject[6];
 
   void Awake()
   {
-    EnsureHealthText();
+    CacheLiveStates();
+    AutoFindMissingLiveStates();
   }
 
   void Start()
@@ -37,35 +42,51 @@ public class HealthBarDisplay : MonoBehaviour
       playerHealth.OnHealthChanged -= Refresh;
   }
 
-  private void EnsureHealthText()
+  private void CacheLiveStates()
   {
-    if (healthText != null)
-      return;
+    liveStates[0] = zeroLives;
+    liveStates[1] = oneLives;
+    liveStates[2] = twoLives;
+    liveStates[3] = threeLives;
+    liveStates[4] = fourLives;
+    liveStates[5] = fiveLives;
+  }
 
-    GameObject textGo = new GameObject("HealthText");
-    textGo.transform.SetParent(transform, false);
-    RectTransform rt = textGo.AddComponent<RectTransform>();
-    rt.anchorMin = new Vector2(0f, 1f);
-    rt.anchorMax = new Vector2(0f, 1f);
-    rt.pivot = new Vector2(0f, 1f);
-    // Stack below points row (same height as ScoreText: 56).
-    rt.anchoredPosition = new Vector2(24f, -80f);
-    rt.sizeDelta = new Vector2(480f, 56f);
+  private void AutoFindMissingLiveStates()
+  {
+    for (int i = 0; i < liveStates.Length; i++)
+    {
+      if (liveStates[i] == null)
+        liveStates[i] = FindLiveState(i);
+    }
 
-    healthText = textGo.AddComponent<Text>();
-    Font font = Font.CreateDynamicFontFromOSFont(new[] { "Arial", "Segoe UI", "Helvetica" }, fontSize);
-    if (font == null)
-      font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-    healthText.font = font;
-    healthText.fontSize = fontSize;
-    healthText.color = Color.white;
-    healthText.alignment = TextAnchor.UpperLeft;
-    healthText.text = prefix + "0";
+    zeroLives = liveStates[0];
+    oneLives = liveStates[1];
+    twoLives = liveStates[2];
+    threeLives = liveStates[3];
+    fourLives = liveStates[4];
+    fiveLives = liveStates[5];
+  }
+
+  private GameObject FindLiveState(int lives)
+  {
+    Transform[] allTransforms = FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+    string expectedName = lives + "Lives";
+    for (int i = 0; i < allTransforms.Length; i++)
+    {
+      if (allTransforms[i].name == expectedName)
+        return allTransforms[i].gameObject;
+    }
+    return null;
   }
 
   private void Refresh(int current, int _)
   {
-    if (healthText != null)
-      healthText.text = prefix + current.ToString();
+    int clampedLives = Mathf.Clamp(current, 0, liveStates.Length - 1);
+    for (int i = 0; i < liveStates.Length; i++)
+    {
+      if (liveStates[i] != null)
+        liveStates[i].SetActive(i == clampedLives);
+    }
   }
 }
