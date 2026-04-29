@@ -212,6 +212,10 @@ public class HelicopterController : MonoBehaviour
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
+        if (input == null)
+            input = GetComponent<HelicopterInput>();
+        if (input != null)
+            input.ResetSmoothedState();
     }
 
     public Quaternion GetFlightAlignedRotation(Quaternion rawRotation)

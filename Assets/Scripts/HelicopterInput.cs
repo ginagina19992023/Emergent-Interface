@@ -55,6 +55,20 @@ public class HelicopterInput : MonoBehaviour
   private float leftHoldAccumulatedTime;
   private float rightHoldAccumulatedTime;
 
+  public void ResetSmoothedState()
+  {
+    Yaw = 0f;
+    PressRate = 0f;
+    ShootPressed = false;
+    yawVelocity = 0f;
+    jumpNeedsRelease = false;
+    leftNeedsRelease = false;
+    rightNeedsRelease = false;
+    leftHoldAccumulatedTime = 0f;
+    rightHoldAccumulatedTime = 0f;
+    pressTimestamps.Clear();
+  }
+
   void Awake()
   {
     var playerInput = GetComponent<PlayerInput>();
