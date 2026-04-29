@@ -2,13 +2,15 @@
     flex-grow: 1;
     align-items: center;
     justify-content: center;
+    padding-top: 0;
 }
 
 .info-box {
     width: 675px;
-    min-height: 742px;
-    background-color: rgba(50, 28, 9, 0.85);
+    min-height: 550px;
+    background-color: rgba(78, 47, 21, 0.9);
     border-radius: 30px;
+    margin-top: -36px;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
@@ -25,13 +27,13 @@
 
 .title {
     font-size: 48px;
-    margin-bottom: 0;
+    margin-bottom: -6px;
 }
 
 .subtitle {
     font-size: 24px;
     margin-top: -5px;
-    margin-bottom: 25px;
+    margin-bottom: 8px;
 }
 
 .info-box .subtitle {
@@ -39,18 +41,18 @@
 }
 
 .section-title {
-    font-size: 16px;
+    font-size: 18px;
     margin-bottom: 5px;
 }
 
 .instruction-text {
-    font-size: 14px;
+    font-size: 16px;
     margin-top: 2px;
 }
 
 .score-note {
     margin-top: -12px;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
 }
 
 .time-text {
@@ -61,13 +63,13 @@
 
 .section {
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     width: 100%;
 }
 
 .controls-section {
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 .row {
@@ -88,7 +90,7 @@
 }
 
 .controls-row {
-    margin-top: 10px;
+    margin-top: 2px;
     width: 80%;
 }
 
@@ -116,8 +118,8 @@
 .image-lives {
     width: 200px;
     height: 44px;
-    margin-top: 5px;
-    margin-bottom: 10px;
+    margin-top: 2px;
+    margin-bottom: 4px;
     background-image: url("project://database/Assets/Images/Start%20screen/3lives_UI.png?fileID=2800000&guid=06fa94ee03554884e99fe8bf41c77454&type=3#3lives_UI");
 }
 
@@ -132,8 +134,8 @@
     font-size: 20px;
     -unity-font-style: normal;
     align-self: center;
-    margin-top: 10px;
-    margin-bottom: 25px;
+    margin-top: 2px;
+    margin-bottom: 5px;
     transition: background-color 0.2s, scale 0.1s;
     -unity-font-definition: url("project://database/Assets/Fonts/JacquesFrancois-Regular.ttf?fileID=12800000&guid=a5a2ea3972629254d95ae115f8345e27&type=3#JacquesFrancois-Regular");
 }
