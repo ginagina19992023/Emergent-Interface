@@ -1,0 +1,56 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="EndScreen.uss"/>
+    <ui:VisualElement name="EndScreenRoot" class="end-screen-container end-screen-hidden">
+        <ui:VisualElement class="end-panel">
+            <ui:Label text="FINISHED" name="FinishedTitle" class="finished-title"/>
+            
+            <ui:VisualElement name="CountsRow" class="counts-row">
+                <ui:VisualElement class="stat-column">
+                    <ui:Label text="Points: 0" name="PointsLabel" class="stat-label"/>
+                    <ui:Label text="+0" name="PointsBonus" class="stat-bonus"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-column">
+                    <ui:Label text="Lives left: 0" name="LivesLabel" class="stat-label"/>
+                    <ui:Label text="+0" name="LivesBonus" class="stat-bonus"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-column">
+                    <ui:Label text="Completion time: 0s" name="TimeLabel" class="stat-label"/>
+                    <ui:Label text="+0" name="TimeBonus" class="stat-bonus"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="TotalScoreSection" class="total-score-section">
+                <ui:Label text="TOTAL SCORE" class="total-score-label"/>
+                <ui:Label text="0" name="TotalScoreValue" class="total-score-value"/>
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="TeamSubmitRow" class="team-submit-row">
+                <ui:TextField name="TeamNameInput" class="team-input" text="" placeholder="Enter team name"/>
+                <ui:Button text="SUBMIT" name="SubmitButton" class="submit-button"/>
+            </ui:VisualElement>
+            
+            <ui:Label text="" name="SubmitStatus" class="submit-status"/>
+            
+            <ui:Button text="RESTART" name="RestartButton" class="restart-button"/>
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="ScoreboardPanel" class="scoreboard-panel">
+            <ui:Label text="Scoreboard" class="scoreboard-title"/>
+            
+            <ui:ScrollView name="ScoreboardList" class="scoreboard-list">
+                <ui:Label text="No teams submitted yet." name="ScoreboardEmptyText" class="scoreboard-empty-text"/>
+            </ui:ScrollView>
+            
+            <ui:Button text="Edit Mode: Off" name="EditModeButton" class="edit-mode-button"/>
+            
+            <ui:VisualElement name="EditControls" class="edit-controls">
+                <ui:TextField name="RenameInput" class="rename-input"/>
+                <ui:VisualElement class="edit-buttons-row">
+                    <ui:Button text="Rename" name="RenameButton" class="rename-button"/>
+                    <ui:Button text="Delete" name="DeleteButton" class="delete-button"/>
+                </ui:VisualElement>
+                <ui:Label text="" name="EditStatus" class="edit-status"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
