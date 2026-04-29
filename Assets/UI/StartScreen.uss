@@ -61,6 +61,15 @@
     margin-bottom: 5px;
 }
 
+.completion-time-value {
+    margin-top: -12px;
+    margin-bottom: -3px;
+}
+
+.completion-time-note {
+    margin-top: -5px;
+}
+
 .section {
     align-items: center;
     margin-bottom: 5px;
@@ -87,6 +96,10 @@
 .control-column {
     align-items: center;
     width: 130px;
+}
+
+.control-action-text {
+    margin-top: -6px;
 }
 
 .controls-row {
@@ -121,6 +134,23 @@
     margin-top: 2px;
     margin-bottom: 4px;
     background-image: url("project://database/Assets/Images/Start%20screen/3lives_UI.png?fileID=2800000&guid=06fa94ee03554884e99fe8bf41c77454&type=3#3lives_UI");
+}
+
+.lives-section .section-title {
+    margin-bottom: -2px;
+}
+
+.lives-section .image-lives {
+    margin-top: -5px;
+    margin-bottom: -3px;
+}
+
+.lives-section .instruction-text {
+    margin-top: -5px;
+}
+
+.completion-time-section {
+    margin-top: 4px;
 }
 
 .start-button {
