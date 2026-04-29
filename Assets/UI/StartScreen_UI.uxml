@@ -1,4 +1,51 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI/StartScreen.uss?fileID=7433441132597879392&amp;guid=4b0ab7f2b58c9a24b94658475b69ac30&amp;type=3#StartScreen"/>
-    <ui:Label text="Test" style="height: 150px; width: 234px;"/>
+    <ui:VisualElement class="screen-container">
+        <ui:VisualElement class="info-box">
+            <ui:Label text="HOW TO PLAY" class="title"/>
+            <ui:Label text="Complete the course and aim for the highest score!" class="subtitle"/>
+            <ui:Label text="Your final score is based on" class="instruction-text score-note"/>
+            <ui:VisualElement class="section">
+                <ui:Label text="POINTS" class="section-title"/>
+                <ui:VisualElement class="row">
+                    <ui:VisualElement class="icon-column">
+                        <ui:VisualElement class="image-placeholder image-crystals"/>
+                        <ui:Label text="Shoot crystals" class="instruction-text"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="icon-column">
+                        <ui:VisualElement name="VisualElement" class="image-placeholder image-gates"/>
+                        <ui:Label text="Go through gates" class="instruction-text"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="section">
+                <ui:Label text="LIVES LEFT" class="section-title"/>
+                <ui:VisualElement class="image-placeholder image-lives"/>
+                <ui:Label text="You lose lives by bumping into walls or objects&#10;Be wary of the wizards’ projectiles!" class="instruction-text"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="section">
+                <ui:Label text="COMPLETION TIME" class="section-title"/>
+                <ui:Label text="3:48" class="time-text"/>
+                <ui:Label text="A faster time gives more points" class="instruction-text"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="section controls-section">
+                <ui:Label text="You control the vehicle by:" class="time-text"/>
+                <ui:VisualElement class="row controls-row">
+                    <ui:VisualElement class="control-column">
+                        <ui:Label text="CRANKING" class="section-title"/>
+                        <ui:Label text="Moving&#10;left &amp; right" class="instruction-text"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="control-column">
+                        <ui:Label text="BIKING" class="section-title"/>
+                        <ui:Label text="Moving&#10;up &amp; down" class="instruction-text"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="control-column">
+                        <ui:Label text="PUNCHING" class="section-title"/>
+                        <ui:Label text="Shooting" class="instruction-text"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button text="PUNCH TO START" class="start-button"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
 </ui:UXML>

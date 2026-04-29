@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 /// <summary>
 /// Controls the scene's existing start screen object. Gameplay is paused until
@@ -11,6 +12,8 @@ public class StartTutorialUI : MonoBehaviour
     [SerializeField] GameObject startScreenUI;
 
     InputAction attackAction;
+    UIDocument startScreenDocument;
+    Button startButton;
     static bool sceneHookRegistered;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -40,13 +43,22 @@ public class StartTutorialUI : MonoBehaviour
     void Awake()
     {
         if (startScreenUI == null)
+            startScreenUI = GameObject.Find("StartScreenUI");
+
+        if (startScreenUI == null)
             startScreenUI = GameObject.Find("Start Screen UI");
 
         PlayerInput playerInput = FindFirstObjectByType<PlayerInput>();
         if (playerInput != null && playerInput.actions != null)
             attackAction = playerInput.actions["Attack"];
 
+        BindStartButton();
         Show();
+    }
+
+    void OnDestroy()
+    {
+        UnbindStartButton();
     }
 
     void Update()
@@ -68,6 +80,9 @@ public class StartTutorialUI : MonoBehaviour
 
     void StartGame()
     {
+        if (startScreenUI == null || !startScreenUI.activeSelf)
+            return;
+
         SetOverlayVisible(false);
         Time.timeScale = 1f;
     }
@@ -76,5 +91,25 @@ public class StartTutorialUI : MonoBehaviour
     {
         if (startScreenUI != null)
             startScreenUI.SetActive(visible);
+    }
+
+    void BindStartButton()
+    {
+        if (startScreenUI == null)
+            return;
+
+        startScreenDocument = startScreenUI.GetComponent<UIDocument>();
+        if (startScreenDocument == null || startScreenDocument.rootVisualElement == null)
+            return;
+
+        startButton = startScreenDocument.rootVisualElement.Q<Button>(className: "start-button");
+        if (startButton != null)
+            startButton.clicked += StartGame;
+    }
+
+    void UnbindStartButton()
+    {
+        if (startButton != null)
+            startButton.clicked -= StartGame;
     }
 }
