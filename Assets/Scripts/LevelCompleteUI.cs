@@ -161,17 +161,8 @@ public class LevelCompleteUI : MonoBehaviour
 
     void Update()
     {
-        if (!isVisible)
-            return;
-
-        bool teamInputFocused = teamNameInput != null && teamNameInput.focusController?.focusedElement == teamNameInput;
-        bool renameInputFocused = renameInput != null && renameInput.focusController?.focusedElement == renameInput;
-
-        if (teamInputFocused || renameInputFocused)
-            return;
-
-        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
-            Restart();
+        // Restart only via the Restart button - no keyboard shortcuts
+        // to prevent accidental restarts from shooting input
     }
 
     public void Show()
