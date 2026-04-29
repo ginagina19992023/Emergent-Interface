@@ -1,0 +1,4 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/StartScreen.uss?fileID=7433441132597879392&amp;guid=4b0ab7f2b58c9a24b94658475b69ac30&amp;type=3#StartScreen"/>
+    <ui:Label text="Test" style="height: 150px; width: 234px;"/>
+</ui:UXML>
