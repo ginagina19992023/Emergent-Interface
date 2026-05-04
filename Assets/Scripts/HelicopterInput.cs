@@ -79,6 +79,12 @@ public class HelicopterInput : MonoBehaviour
 
   void Update()
   {
+    // Gameplay is frozen (start screen, level complete, respawn overlay, etc.). Do not read
+    // input — the Input System still fires while timeScale is 0, which would stack steering
+    // and lift when time resumes.
+    if (Time.timeScale <= 0f)
+      return;
+
     Vector2 move = moveAction.ReadValue<Vector2>();
 
     UpdateYawSteering(move.x);
