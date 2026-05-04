@@ -13,11 +13,10 @@ GameObject:
   - component: {fileID: 3840706531247005965}
   - component: {fileID: 7149353521984827900}
   - component: {fileID: 7600050549151502814}
-  - component: {fileID: 8539195935486203464}
-  - component: {fileID: 6712396284817341504}
   - component: {fileID: 7823491823419077821}
   - component: {fileID: 596306155784976668}
   - component: {fileID: 1135707191903194638}
+  - component: {fileID: 1003559322645913914}
   m_Layer: 2
   m_Name: Boost Gate
   m_TagString: Untagged
@@ -72762,49 +72761,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6429457050257189903}
   m_Mesh: {fileID: 0}
---- !u!64 &8539195935486203464
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6429457050257189903}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 0
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
---- !u!65 &6712396284817341504
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6429457050257189903}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 52, y: 22, z: 52}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &7823491823419077821
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -72845,6 +72801,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GatePassScore
   pointsOnPass: 100
+  gateVisualToHide: {fileID: 0}
 --- !u!114 &1135707191903194638
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72860,3 +72817,25 @@ MonoBehaviour:
   velocityImpulse: 100
   extraForwardAcceleration: 40
   boostDuration: 5
+  gateVisualToHide: {fileID: 0}
+--- !u!65 &1003559322645913914
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6429457050257189903}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 40, y: 5, z: 40}
+  m_Center: {x: 0, y: 0, z: 0}
