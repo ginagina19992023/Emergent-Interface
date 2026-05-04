@@ -185,14 +185,16 @@
     position: absolute;
     right: 100px;
     top: 100px;
-    width: 280px;
-    height: 380px;
+    width: 400px;
+    height: 880px;
     border-width: 1px;
     border-color: rgb(255, 255, 255);
     border-radius: 10px;
     padding: 16px;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
 }
 
 .scoreboard-title {
@@ -201,15 +203,16 @@
     -unity-text-align: middle-center;
     -unity-font-definition: url("project://database/Assets/Fonts/JacquesFrancois-Regular.ttf?fileID=12800000&guid=a5a2ea3972629254d95ae115f8345e27&type=3#JacquesFrancois-Regular");
     margin-bottom: 16px;
+    flex-shrink: 0;
 }
 
 .scoreboard-list {
     flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
     width: 100%;
-}
-
-.scoreboard-list ScrollView {
-    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .scoreboard-entry {
@@ -226,6 +229,11 @@
     -unity-font-definition: url("project://database/Assets/Fonts/JacquesFrancois-Regular.ttf?fileID=12800000&guid=a5a2ea3972629254d95ae115f8345e27&type=3#JacquesFrancois-Regular");
     -unity-text-align: middle-left;
     flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .scoreboard-entry-score {
@@ -234,6 +242,11 @@
     -unity-font-definition: url("project://database/Assets/Fonts/JacquesFrancois-Regular.ttf?fileID=12800000&guid=a5a2ea3972629254d95ae115f8345e27&type=3#JacquesFrancois-Regular");
     -unity-text-align: middle-right;
     min-width: 60px;
+    flex-shrink: 0;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .scoreboard-entry-selected {
@@ -260,6 +273,7 @@
     -unity-text-align: middle-center;
     margin-top: 10px;
     transition: background-color 0.2s;
+    flex-shrink: 0;
 }
 
 .edit-mode-button:hover {
@@ -272,6 +286,7 @@
     flex-direction: column;
     align-items: center;
     display: none;
+    flex-shrink: 0;
 }
 
 .edit-controls-visible {

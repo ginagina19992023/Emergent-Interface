@@ -37,9 +37,9 @@
         <ui:VisualElement name="ScoreboardPanel" class="scoreboard-panel">
             <ui:Label text="Scoreboard" class="scoreboard-title"/>
             
-            <ui:ScrollView name="ScoreboardList" class="scoreboard-list">
+            <ui:VisualElement name="ScoreboardList" class="scoreboard-list">
                 <ui:Label text="No teams submitted yet." name="ScoreboardEmptyText" class="scoreboard-empty-text"/>
-            </ui:ScrollView>
+            </ui:VisualElement>
             
             <ui:Button text="Edit Mode: Off" name="EditModeButton" class="edit-mode-button"/>
             

@@ -35,7 +35,7 @@ public class LevelCompleteUI : MonoBehaviour
     Label submitStatus;
     Button restartButton;
 
-    ScrollView scoreboardList;
+    VisualElement scoreboardList;
     Label scoreboardEmptyText;
     Button editModeButton;
     VisualElement editControls;
@@ -113,7 +113,7 @@ public class LevelCompleteUI : MonoBehaviour
         submitStatus = root.Q<Label>("SubmitStatus");
         restartButton = root.Q<Button>("RestartButton");
 
-        scoreboardList = root.Q<ScrollView>("ScoreboardList");
+        scoreboardList = root.Q<VisualElement>("ScoreboardList");
         scoreboardEmptyText = root.Q<Label>("ScoreboardEmptyText");
         editModeButton = root.Q<Button>("EditModeButton");
         editControls = root.Q<VisualElement>("EditControls");
@@ -438,7 +438,10 @@ public class LevelCompleteUI : MonoBehaviour
         if (entries.Count == 0)
         {
             if (scoreboardEmptyText != null)
+            {
                 scoreboardEmptyText.style.display = DisplayStyle.Flex;
+                scoreboardList.Add(scoreboardEmptyText);
+            }
             selectedScoreboardIndex = -1;
             RefreshEditControls();
             return;
