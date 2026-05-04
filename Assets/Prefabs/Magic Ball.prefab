@@ -144,7 +144,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   speed: 100
   lifetime: 60000
-  contactDamage: 1
+  contactDamage: 0
   helicopterTransform: {fileID: 0}
   playerHealth: {fileID: 0}
 --- !u!54 &1616199403148193456
