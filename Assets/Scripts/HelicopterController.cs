@@ -138,6 +138,7 @@ public class HelicopterController : MonoBehaviour
     private bool defaultUseGravity = true;
     private bool verticalMotionLocked;
     private Coroutine shootExplosionRoutine;
+    private Coroutine directionalBoostRoutine;
 
     void Start()
     {
@@ -200,6 +201,7 @@ public class HelicopterController : MonoBehaviour
 
     public void TeleportToLastRespawnPoint()
     {
+        CancelDirectionalBoost();
         Quaternion respawnRotation = ConstrainRotationForFlight(LastRespawnPointRotation);
         LastRespawnPointRotation = respawnRotation;
         transform.SetPositionAndRotation(LastRespawnPointPosition, respawnRotation);
@@ -460,7 +462,18 @@ public class HelicopterController : MonoBehaviour
         if (velocityImpulse != 0f)
             rb.AddForce(worldDirection * velocityImpulse, ForceMode.VelocityChange);
         if (sustainedAcceleration > 0f && duration > 0f)
-            StartCoroutine(DirectionalBoostRoutine(worldDirection, sustainedAcceleration, duration));
+        {
+            CancelDirectionalBoost();
+            directionalBoostRoutine = StartCoroutine(DirectionalBoostRoutine(worldDirection, sustainedAcceleration, duration));
+        }
+    }
+
+    void CancelDirectionalBoost()
+    {
+        if (directionalBoostRoutine == null)
+            return;
+        StopCoroutine(directionalBoostRoutine);
+        directionalBoostRoutine = null;
     }
 
     IEnumerator DirectionalBoostRoutine(Vector3 direction, float acceleration, float duration)
@@ -472,6 +485,7 @@ public class HelicopterController : MonoBehaviour
             elapsed += Time.fixedDeltaTime;
             yield return new WaitForFixedUpdate();
         }
+        directionalBoostRoutine = null;
     }
 
     private void ApplyShake()

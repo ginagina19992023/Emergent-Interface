@@ -1,0 +1,10 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="PauseScreen.uss"/>
+    <ui:VisualElement name="PauseScreenRoot" class="pause-screen-root pause-screen-hidden">
+        <ui:VisualElement class="pause-panel">
+            <ui:Label text="PAUSED" name="PauseTitle" class="pause-title"/>
+            <ui:Button text="CONTINUE" name="ContinueButton" class="pause-primary-button"/>
+            <ui:Button text="RESTART" name="RestartButton" class="pause-primary-button pause-restart-button"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
