@@ -23,6 +23,8 @@ public class HelicopterController : MonoBehaviour
     [SerializeField] private float respawnMessageHoldSeconds = 2f;
     [Tooltip("Color used for the respawn fullscreen fade.")]
     [SerializeField] private Color respawnFadeColor = Color.black;
+    [Tooltip("Font for respawn overlay (crash message and countdown). Falls back to a system font if unset.")]
+    [SerializeField] private Font respawnUiFont;
 
     [Header("Lift (press rate controls altitude)")]
     [Tooltip("Press rate (presses/sec) needed to hover. Below this = fall, above = rise.")]
@@ -349,9 +351,15 @@ public class HelicopterController : MonoBehaviour
         respawnCountdownText.fontStyle = FontStyle.Bold;
         respawnCountdownText.color = new Color(1f, 1f, 1f, 0.95f);
         respawnCountdownText.raycastTarget = false;
-        respawnCountdownText.font = Font.CreateDynamicFontFromOSFont(new[] { "Arial", "Segoe UI", "Helvetica" }, 96);
-        if (respawnCountdownText.font == null)
-            respawnCountdownText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+        Font overlayFont = respawnUiFont;
+        if (overlayFont == null)
+        {
+            overlayFont = Font.CreateDynamicFontFromOSFont(new[] { "Arial", "Segoe UI", "Helvetica" }, 96);
+            if (overlayFont == null)
+                overlayFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        }
+        respawnCountdownText.font = overlayFont;
 
         GameObject messageGo = new GameObject("Message");
         messageGo.transform.SetParent(canvasGo.transform, false);
@@ -364,11 +372,11 @@ public class HelicopterController : MonoBehaviour
         respawnMessageText = messageGo.AddComponent<Text>();
         respawnMessageText.alignment = TextAnchor.MiddleCenter;
         respawnMessageText.fontSize = 44;
-        respawnMessageText.fontStyle = FontStyle.Bold;
+        respawnMessageText.fontStyle = FontStyle.Normal;
         respawnMessageText.color = new Color(1f, 1f, 1f, 0.95f);
         respawnMessageText.raycastTarget = false;
         respawnMessageText.text = "You crashed, respawning...";
-        respawnMessageText.font = respawnCountdownText.font;
+        respawnMessageText.font = overlayFont;
 
         canvasGo.SetActive(false);
     }
